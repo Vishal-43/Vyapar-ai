@@ -4,8 +4,8 @@ from typing import Any, Optional
 
 from loguru import logger
 
-from core.exceptions import ValidationError
-from core.utils import parse_timestamp
+from app.core.exceptions import ValidationError
+from app.core.utils import parse_timestamp
 
 class DataValidator:
 

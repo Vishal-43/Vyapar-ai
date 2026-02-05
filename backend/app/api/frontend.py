@@ -1,16 +1,12 @@
-from contextlib import asynccontextmanager
+
 from datetime import timedelta
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import List, Optional
 
 import numpy as np
 import pandas as pd
-from fastapi import APIRouter, Depends, HTTPException, Query, status, Request, FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.exceptions import RequestValidationError
-from starlette.responses import JSONResponse
+from fastapi import APIRouter, Depends, HTTPException, Query, status, Request
 from loguru import logger
-import time
 
 from app.config import settings
 
@@ -31,7 +27,7 @@ from app.database.repositories import (
     PredictionMetricsRepository,
 )
 from app.ml.predictor import AgriculturalPredictor
-from models.schemas import (
+from app.models.schemas import (
     ForecastRequest,
     ForecastResponse,
     ForecastPoint,
@@ -47,145 +43,6 @@ from models.schemas import (
     RecommendationRow,
 )
 from pydantic import BaseModel
-
-
-class AgriTechException(Exception):
-    def __init__(self, message: str, status_code: int = 400, details: dict = None):
-        self.message = message
-        self.status_code = status_code
-        self.details = details or {}
-        super().__init__(message)
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    
-    logger.info(f"{settings.app_name} v{settings.app_version} starting up")
-    logger.info(f"Running in {settings.environment} mode")
-    
-    import os
-    if None:
-        scheduler = get_scheduler()
-        scheduler.start()
-        logger.info("Background data collection and training scheduler activated")
-    else:
-        logger.info("Scheduler disabled during testing")
-        scheduler = None
-    
-    yield
-    
-    if scheduler:
-        scheduler.stop()
-    logger.info(f"{settings.app_name} shutting down gracefully")
-
-app = FastAPI(
-    title=settings.app_name,
-    version=settings.app_version,
-    description="Industry-level Agricultural Market Data Analysis API with ML predictions",
-    docs_url="/docs",
-    redoc_url="/redoc",
-    openapi_url="/openapi.json",
-    lifespan=lifespan,
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.cors_origins,
-    allow_credentials=settings.cors_allow_credentials,
-    allow_methods=settings.cors_allow_methods,
-    allow_headers=settings.cors_allow_headers,
-)
-
-@app.middleware("http")
-async def log_requests(request: Request, call_next):
-    
-    start_time = time.time()
-    response = await call_next(request)
-    process_time = time.time() - start_time
-    
-    try:
-        logger.opt(lazy=True).info(
-            f"{request.method} {request.url.path} completed in {process_time:.3f}s with status {response.status_code}"
-        )
-    except Exception:
-        pass
-    
-    response.headers["X-Process-Time"] = str(process_time)
-    response.headers["X-API-Version"] = settings.app_version
-    
-    return response
-
-@app.exception_handler(AgriTechException)
-async def agritech_exception_handler(request: Request, exc: AgriTechException):
-    
-    logger.error(
-        f"{exc.message} at {request.url.path}",
-        extra={"status": exc.status_code, "details": exc.details}
-    )
-    
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={
-            "error": exc.__class__.__name__,
-            "message": exc.message,
-            "details": exc.details,
-            "timestamp": get_current_timestamp().isoformat(),
-        }
-    )
-
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
-
-    logger.warning(
-        f"Validation error",
-        extra={
-            "errors": exc.errors(),
-            "url": str(request.url),
-        }
-    )
-    
-    return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content={
-            "error": "ValidationError",
-            "message": "Request validation failed",
-            "details": {"errors": exc.errors()},
-            "timestamp": get_current_timestamp().isoformat(),
-        }
-    )
-
-@app.exception_handler(Exception)
-async def general_exception_handler(request: Request, exc: Exception):
-
-    logger.exception(
-        f"Unexpected error: {str(exc)}",
-        extra={
-            "url": str(request.url),
-            "exception_type": type(exc).__name__,
-        }
-    )
-    
-    return JSONResponse(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={
-            "error": "InternalServerError",
-            "message": "An unexpected error occurred",
-            "details": {"error": str(exc)} if settings.debug else {},
-            "timestamp": get_current_timestamp().isoformat(),
-        }
-    )
-
-@app.get("/api/", tags=["Root"])
-async def root() -> dict[str, Any]:
-
-    return {
-        "name": settings.app_name,
-        "version": settings.app_version,
-        "status": "running",
-        "docs": "/docs",
-        "redoc": "/redoc",
-        "timestamp": get_current_timestamp().isoformat(),
-    }
-
 
 router = APIRouter()
 
@@ -221,7 +78,7 @@ async def _get_or_create_entities(
     return commodity, market
 
 @router.post(
-    "/api/forecast",
+    "/forecast",
     response_model=ForecastResponse,
     status_code=status.HTTP_200_OK,
 )
@@ -266,12 +123,12 @@ async def generate_forecast(
 
         use_model_predictions = True
         model_dir = Path(settings.model_dir)
-        
+        # Check if models are loaded in the predictor (they should be via dependency injection)
         if predictor.ensemble.models and predictor.ensemble.preprocessor:
-           
+            # Models are loaded, use them for predictions
             logger.info(f"Using {len(predictor.ensemble.models)} loaded models for forecasts")
         else:
-          
+            # Models not loaded, use fallback pricing
             use_model_predictions = False
             logger.info("No trained models available; using fallback pricing for forecasts")
 
@@ -345,7 +202,71 @@ async def generate_forecast(
         raise HTTPException(status_code=500, detail="Unable to generate forecast")
 
 @router.get(
-    "/api/model/accuracy",
+    "/ai/insights",
+    response_model=List[InsightItemResponse],
+    status_code=status.HTTP_200_OK,
+)
+async def generate_ai_insights(
+    market_price_repo: MarketPriceRepository = Depends(get_market_price_repo),
+    commodity_repo: CommodityRepository = Depends(get_commodity_repo),
+) -> List[InsightItemResponse]:
+
+    try:
+        recent_prices = await market_price_repo.get_recent_prices(days=30)
+
+        if not recent_prices:
+            return []
+
+        commodity_cache = {}
+        for price in recent_prices:
+            if price.commodity_id not in commodity_cache:
+                commodity = await commodity_repo.get_by_id(price.commodity_id)
+                commodity_cache[price.commodity_id] = commodity.name if commodity else "Commodity"
+
+        insights: List[InsightItemResponse] = []
+
+        by_commodity: dict[int, list[float]] = {}
+        for price in recent_prices:
+            price_val = price.price or price.modal_price
+            if price_val is None:
+                continue
+            by_commodity.setdefault(price.commodity_id, []).append(float(price_val))
+
+        for idx, (commodity_id, prices) in enumerate(by_commodity.items()):
+            if not prices:
+                continue
+            recent_avg = float(np.mean(prices[-7:]))
+            prior_avg = float(np.mean(prices[:-7])) if len(prices) > 7 else recent_avg
+            change_pct = ((recent_avg - prior_avg) / prior_avg * 100) if prior_avg else 0.0
+
+            priority = "info"
+            if change_pct >= 8:
+                priority = "high"
+            elif change_pct >= 3:
+                priority = "medium"
+
+            reason = (
+                f"{commodity_cache.get(commodity_id, 'Commodity')} prices moved {change_pct:+.1f}% over the last week"
+            )
+
+            insights.append(
+                InsightItemResponse(
+                    id=f"c{commodity_id}-{idx}",
+                    title="Price momentum detected" if change_pct >= 0 else "Price softening observed",
+                    reason=reason,
+                    priority=priority,
+                    confidence=min(95, 70 + abs(int(change_pct))),
+                    timeHorizon="Immediate" if abs(change_pct) > 5 else "Upcoming",
+                )
+            )
+
+        return insights[:8] if insights else []
+    except Exception as exc:
+        logger.exception(f"Insight generation failed: {exc}")
+        raise HTTPException(status_code=500, detail="Unable to build insights")
+
+@router.get(
+    "/model/accuracy",
     response_model=ModelAccuracySummary,
     status_code=status.HTTP_200_OK,
 )
@@ -395,7 +316,172 @@ async def model_accuracy_summary(
         raise HTTPException(status_code=500, detail="Unable to fetch model accuracy")
 
 @router.get(
-    "/api/product-analysis",
+    "/inventory/dashboard",
+    response_model=List[InventoryDashboardItem],
+    status_code=status.HTTP_200_OK,
+)
+async def inventory_dashboard(
+    inventory_repo: InventoryRepository = Depends(get_inventory_repo),
+    commodity_repo: CommodityRepository = Depends(get_commodity_repo),
+    market_repo: MarketRepository = Depends(get_market_repo),
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=100, ge=1, le=500),
+) -> List[InventoryDashboardItem]:
+
+    try:
+        inventory_items = await inventory_repo.get_all(skip=skip, limit=limit)
+
+        if not inventory_items:
+            return []
+
+        response: list[InventoryDashboardItem] = []
+
+        for item in inventory_items:
+            commodity = await commodity_repo.get_by_id(item.commodity_id)
+            market = await market_repo.get_by_id(item.market_id)
+
+            suggested = item.optimal_stock or (item.current_stock * 1.1)
+            risk_ratio = item.current_stock / suggested if suggested else 1
+            if risk_ratio < 0.7:
+                risk = "High"
+            elif risk_ratio < 0.9:
+                risk = "Medium"
+            else:
+                risk = "Low"
+
+            response.append(
+                InventoryDashboardItem(
+                    id=item.id,
+                    market=market.name if market else "Unknown",
+                    category=commodity.category if commodity else None,
+                    product=commodity.name if commodity else "Product",
+                    current=item.current_stock,
+                    suggested=suggested,
+                    risk=risk,
+                )
+            )
+
+        return response
+    except Exception as exc:
+        logger.exception(f"Inventory dashboard failed: {exc}")
+        raise HTTPException(status_code=500, detail="Unable to fetch inventory data")
+
+@router.get(
+    "/inventory/filter",
+    response_model=List[InventoryDashboardItem],
+    status_code=status.HTTP_200_OK,
+)
+async def filter_inventory(
+    inventory_repo: InventoryRepository = Depends(get_inventory_repo),
+    commodity_repo: CommodityRepository = Depends(get_commodity_repo),
+    market_repo: MarketRepository = Depends(get_market_repo),
+    market: Optional[str] = Query(None, description="Filter by market name"),
+    category: Optional[str] = Query(None, description="Filter by commodity category"),
+    product: Optional[str] = Query(None, description="Filter by product name"),
+    risk: Optional[str] = Query(None, description="Filter by risk level: High, Medium, Low"),
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=100, ge=1, le=500),
+) -> List[InventoryDashboardItem]:
+
+    try:
+        inventory_items = await inventory_repo.get_all(skip=skip, limit=limit)
+
+        if not inventory_items:
+            return []
+
+        response: list[InventoryDashboardItem] = []
+
+        for item in inventory_items:
+            commodity = await commodity_repo.get_by_id(item.commodity_id)
+            market_obj = await market_repo.get_by_id(item.market_id)
+
+            suggested = item.optimal_stock or (item.current_stock * 1.1)
+            risk_ratio = item.current_stock / suggested if suggested else 1
+            if risk_ratio < 0.7:
+                item_risk = "High"
+            elif risk_ratio < 0.9:
+                item_risk = "Medium"
+            else:
+                item_risk = "Low"
+
+            if market and market_obj and market.lower() not in market_obj.name.lower():
+                continue
+            if category and commodity and category.lower() not in (commodity.category or "").lower():
+                continue
+            if product and commodity and product.lower() not in commodity.name.lower():
+                continue
+            if risk and risk != item_risk:
+                continue
+
+            response.append(
+                InventoryDashboardItem(
+                    id=item.id,
+                    market=market_obj.name if market_obj else "Unknown",
+                    category=commodity.category if commodity else None,
+                    product=commodity.name if commodity else "Product",
+                    current=item.current_stock,
+                    suggested=suggested,
+                    risk=item_risk,
+                )
+            )
+
+        return response
+    except Exception as exc:
+        logger.exception(f"Inventory filter failed: {exc}")
+        raise HTTPException(status_code=500, detail="Unable to filter inventory data")
+
+@router.post(
+    "/inventory/update",
+    status_code=status.HTTP_200_OK,
+)
+async def update_inventory(
+    update_data: dict,
+    inventory_repo: InventoryRepository = Depends(get_inventory_repo),
+):
+
+    try:
+        items = update_data.get("items", [])
+        
+        if not items:
+            raise HTTPException(status_code=400, detail="No items provided")
+        
+        logger.info(f"Inventory update requested with {len(items)} items")
+        
+        updated_count = 0
+        for item_data in items:
+            item_id = item_data.get("id")
+            new_current = item_data.get("current")
+            
+            if not item_id or new_current is None:
+                logger.warning(f"Skipping item without id or current stock: {item_data}")
+                continue
+            
+            inventory_item = await inventory_repo.get_by_id(item_id)
+            if not inventory_item:
+                logger.warning(f"Inventory item {item_id} not found")
+                continue
+            
+            await inventory_repo.update(item_id, current_stock=float(new_current))
+            updated_count += 1
+            logger.info(f"Updated inventory {item_id}: current_stock = {new_current}")
+        
+        await inventory_repo.db.commit()
+        
+        return {
+            "status": "success",
+            "message": f"Updated {updated_count} inventory items",
+            "timestamp": get_current_timestamp().isoformat(),
+            "items_updated": updated_count,
+        }
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.exception(f"Inventory update failed: {exc}")
+        await inventory_repo.db.rollback()
+        raise HTTPException(status_code=500, detail="Unable to update inventory")
+
+@router.get(
+    "/product-analysis",
     response_model=ProductAnalysisResponse,
     status_code=status.HTTP_200_OK,
 )
@@ -586,7 +672,7 @@ def get_commodity_category(name: str, existing_category: str = None) -> str:
     return CATEGORY_MAPPING.get(name, "Other")
 
 @router.get(
-    "/api/commodities",
+    "/commodities",
     response_model=List[dict],
     status_code=status.HTTP_200_OK,
 )
@@ -631,7 +717,7 @@ async def init_user(request: "Request"):
         raise HTTPException(status_code=500, detail="Unable to initialize user")
 
 @router.get(
-    "/api/markets",
+    "/markets",
     response_model=List[dict],
     status_code=status.HTTP_200_OK,
 )
@@ -645,9 +731,36 @@ async def get_markets(market_repo: MarketRepository = Depends(get_market_repo)):
         raise HTTPException(status_code=500, detail="Unable to fetch markets")
 
 
+@router.get(
+    "/weather",
+    status_code=status.HTTP_200_OK,
+)
+async def get_weather(
+    state: str = Query(default="Delhi", description="State name for weather data"),
+):
+    """Get current weather and agricultural impact for a state."""
+    try:
+        from app.services.weather_service import get_weather_service
+        
+        weather_service = get_weather_service()
+        current_weather = await weather_service.get_current_weather(state)
+        forecast = await weather_service.get_forecast(state, days=5)
+        impact = weather_service.get_agricultural_impact(current_weather)
+        
+        return {
+            "state": state,
+            "current": current_weather,
+            "forecast": forecast,
+            "agricultural_impact": impact,
+            "fetched_at": get_current_timestamp().isoformat(),
+        }
+    except Exception as exc:  # noqa: BLE001
+        logger.exception(f"Weather fetch failed: {exc}")
+        raise HTTPException(status_code=500, detail="Unable to fetch weather data")
+
 
 @router.get(
-    "/api/price-history",
+    "/price-history",
     status_code=status.HTTP_200_OK,
 )
 async def get_price_history(
@@ -721,88 +834,164 @@ async def get_price_history(
 
 
 @router.get(
-    "/api/price-history",
+    "/market-comparison",
     status_code=status.HTTP_200_OK,
 )
-async def get_price_history(
-    commodity_name: Optional[str] = Query(None, alias="commodity_name", description="Commodity name"),
-    market_name: Optional[str] = Query(None, alias="market_name", description="Market name"),
-    commodity: Optional[str] = Query(None, description="Commodity name (alias)"),
-    market: Optional[str] = Query(None, description="Market name (alias)"),
-    days: int = Query(default=30, ge=1, le=90, description="Number of days"),
+async def get_market_comparison(
+    commodity: str = Query(..., description="Commodity name to compare across markets"),
     commodity_repo: CommodityRepository = Depends(get_commodity_repo),
     market_repo: MarketRepository = Depends(get_market_repo),
     market_price_repo: MarketPriceRepository = Depends(get_market_price_repo),
 ):
-    """Get historical price data for charting."""
+    """Get price comparison for a commodity across different markets."""
     try:
-        # Support both naming conventions
-        commodity_search = commodity_name or commodity
-        market_search = market_name or market
-        
-        if not commodity_search or not market_search:
-            raise HTTPException(status_code=422, detail="Both commodity and market are required")
-        
-        # Try exact match first, then case-insensitive
-        commodity_obj = await commodity_repo.get_by_name(commodity_search)
+        commodity_obj = await commodity_repo.get_by_name(commodity)
         if not commodity_obj:
-            commodity_obj = await commodity_repo.get_by_name(commodity_search.title())
-        if not commodity_obj:
-            commodity_obj = await commodity_repo.get_by_name(commodity_search.capitalize())
+            raise HTTPException(status_code=404, detail=f"Commodity '{commodity}' not found")
         
-        market_obj = await market_repo.get_by_name(market_search)
-        if not market_obj:
-            market_obj = await market_repo.get_by_name(market_search.title())
+        # Get all markets
+        markets = await market_repo.get_all(limit=50)
         
-        if not commodity_obj or not market_obj:
-            # Return empty data instead of 404 to prevent frontend errors
-            return {
-                "commodity": commodity_search,
-                "market": market_search,
-                "days": days,
-                "prices": [],
-                "count": 0,
-                "message": "No data found for the specified commodity/market combination"
-            }
+        comparison_data = []
+        for market in markets:
+            # Get latest price for this commodity in this market
+            history = await market_price_repo.get_price_history(
+                commodity_id=commodity_obj.id,
+                market_id=market.id,
+                days=7,
+            )
+            
+            if history:
+                latest = history[0]
+                prices = [p.price or p.modal_price for p in history if p.price or p.modal_price]
+                avg_price = float(np.mean(prices)) if prices else 0
+                current_price = float(latest.price or latest.modal_price or 0)
+                
+                comparison_data.append({
+                    "market": market.name,
+                    "state": market.state or "",
+                    "price": current_price,
+                    "currentPrice": current_price,
+                    "minPrice": float(latest.min_price or 0) if latest.min_price else None,
+                    "maxPrice": float(latest.max_price or 0) if latest.max_price else None,
+                    "avgPrice": avg_price,
+                    "change": 0,
+                    "lastUpdated": latest.date.isoformat(),
+                })
         
-        history = await market_price_repo.get_price_history(
-            commodity_id=commodity_obj.id,
-            market_id=market_obj.id,
-            days=days,
-        )
+        # Sort by current price
+        comparison_data.sort(key=lambda x: x["currentPrice"])
         
         return {
             "commodity": commodity_obj.name,
-            "market": market_obj.name,
-            "days": days,
-            "prices": [
-                {
-                    "date": p.date.isoformat(),
-                    "price": float(p.price or p.modal_price or 0),
-                    "min_price": float(p.min_price) if p.min_price else None,
-                    "max_price": float(p.max_price) if p.max_price else None,
-                    "arrival": p.arrival,
-                }
-                for p in history
-            ],
-            "count": len(history),
+            "markets": comparison_data,
+            "count": len(comparison_data),
+            "cheapestMarket": comparison_data[0]["market"] if comparison_data else None,
+            "mostExpensiveMarket": comparison_data[-1]["market"] if comparison_data else None,
         }
     except HTTPException:
         raise
-    except Exception as exc:  # noqa: BLE001
-        logger.exception(f"Price history fetch failed: {exc}")
-        raise HTTPException(status_code=500, detail="Unable to fetch price history")
-
-app.include_router(router)
+    except Exception as exc:
+        logger.exception(f"Market comparison fetch failed: {exc}")
+        raise HTTPException(status_code=500, detail="Unable to fetch market comparison")
 
 
-if __name__ == "__main__":
-    import uvicorn
-    
-    uvicorn.run(
-        "main:app",
-        host=settings.host,
-        port=settings.port,
-        reload=settings.reload,
-        log_level=settings.log_level.lower(),
-    )
+@router.get(
+    "/export/prices",
+    status_code=status.HTTP_200_OK,
+)
+async def export_prices(
+    days: int = Query(30, description="Number of days of price data to export"),
+    commodity_name: Optional[str] = Query(None, description="Filter by commodity"),
+    market_name: Optional[str] = Query(None, description="Filter by market"),
+    commodity_repo: CommodityRepository = Depends(get_commodity_repo),
+    market_repo: MarketRepository = Depends(get_market_repo),
+    market_price_repo: MarketPriceRepository = Depends(get_market_price_repo),
+):
+    """Export price history data for download."""
+    try:
+        from datetime import datetime, timedelta
+        
+        # Get all commodities and markets
+        commodities = await commodity_repo.get_all(limit=100)
+        markets = await market_repo.get_all(limit=100)
+        
+        if not commodities or not markets:
+            return []
+        
+        export_data = []
+        end_date = datetime.now()
+        start_date = end_date - timedelta(days=days)
+        
+        # Filter commodities and markets if specified
+        commodity_filter = [c for c in commodities if not commodity_name or c.name.lower() == commodity_name.lower()]
+        market_filter = [m for m in markets if not market_name or m.name.lower() == market_name.lower()]
+        
+        # Limit to first few combinations to avoid timeout
+        for commodity in commodity_filter[:10]:
+            for market in market_filter[:5]:
+                prices = await market_price_repo.get_price_history(
+                    commodity_id=commodity.id,
+                    market_id=market.id,
+                    days=days,
+                )
+                
+                for price in prices:
+                    try:
+                        date_val = price.date.isoformat() if hasattr(price, 'date') and price.date else ""
+                        export_data.append({
+                            "date": date_val,
+                            "commodity": commodity.name,
+                            "market": market.name,
+                            "state": getattr(market, 'state', ''),
+                            "min_price": float(price.min_price) if price.min_price else 0,
+                            "max_price": float(price.max_price) if price.max_price else 0,
+                            "modal_price": float(price.modal_price) if price.modal_price else 0,
+                        })
+                    except Exception as e:
+                        logger.warning(f"Error processing price record: {e}")
+                        continue
+        
+        export_data.sort(key=lambda x: x["date"], reverse=True)
+        
+        return export_data
+    except Exception as exc:
+        logger.exception(f"Export prices failed: {exc}")
+        raise HTTPException(status_code=500, detail="Unable to export price data")
+
+
+@router.post("/refresh-data")
+async def refresh_market_data():
+    try:
+        from app.services.scheduler import get_scheduler
+        scheduler = get_scheduler()
+        await scheduler.daily_data_collection()
+        return {"status": "success", "message": "Market data refresh initiated"}
+    except Exception as exc:
+        logger.exception(f"Data refresh failed: {exc}")
+        raise HTTPException(status_code=500, detail="Unable to refresh market data")
+
+
+@router.get("/data-status")
+async def get_data_status(
+    market_price_repo: MarketPriceRepository = Depends(get_market_price_repo),
+):
+    try:
+        recent_prices = await market_price_repo.get_recent_prices(days=1)
+        all_prices = await market_price_repo.get_recent_prices(days=30)
+        
+        last_update = None
+        if recent_prices:
+            dates = [p.date for p in recent_prices if p.date]
+            if dates:
+                last_update = max(dates).isoformat()
+        
+        return {
+            "last_update": last_update,
+            "records_today": len(recent_prices),
+            "records_30_days": len(all_prices),
+            "status": "healthy" if len(recent_prices) > 0 else "stale"
+        }
+    except Exception as exc:
+        logger.exception(f"Data status check failed: {exc}")
+        raise HTTPException(status_code=500, detail="Unable to check data status")
