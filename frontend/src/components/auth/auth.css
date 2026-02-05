@@ -1,0 +1,53 @@
+
+.market-graph {
+  position: absolute;
+  inset: auto 0 12% 0;
+  height: 45%;
+  width: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.market-line {
+  fill: none;
+  stroke-linecap: round;
+  stroke-dasharray: 1200;
+  stroke-dashoffset: 1200;
+  animation: draw-line 3.5s ease-out forwards;
+}
+
+.line-strong {
+  stroke: rgba(16, 185, 129, 0.95);
+  stroke-width: 3;
+  filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.35));
+  animation:
+    draw-line 3.2s ease-out forwards,
+    float-line 10s ease-in-out infinite;
+}
+
+.line-medium {
+  stroke: rgba(5, 150, 105, 0.75);
+  stroke-width: 2.8;
+  animation:
+    draw-line 3.6s ease-out forwards,
+    float-line 14s ease-in-out infinite;
+}
+
+.line-soft {
+  stroke: rgba(107, 114, 128, 0.6);
+  stroke-width: 2.4;
+  animation:
+    draw-line 4s ease-out forwards,
+    float-line 18s ease-in-out infinite;
+}
+
+.line-faint {
+  stroke: rgba(16, 185, 129, 0.35);
+  stroke-width: 2;
+  animation:
+    draw-line 4.6s ease-out forwards,
+    float-line 22s ease-in-out infinite;
+}
+
+.delay-1 { animation-delay: 0.8s; }
+.delay-2 { animation-delay: 1.4s; }

@@ -1,0 +1,154 @@
+@import "tailwindcss";
+
+/* =========================
+   BASE TOKENS (NEUTRAL)
+   ========================= */
+:root {
+  --emerald-main: 16, 185, 129;
+}
+
+/* =========================
+   LIGHT THEME (EXPLICIT)
+   ========================= */
+.light {
+  --bg-main: #ffffff;
+  --bg-soft: #f9fafb;
+  --panel: rgba(255, 255, 255, 0.92);
+
+  --text-main: #1f2937;   /* gray-800 */
+  --text-soft: #6b7280;   /* gray-500 */
+
+  --border: rgba(229, 231, 235, 1);
+  --glass-white: 255, 255, 255;
+}
+
+/* =========================
+   DARK THEME (EXPLICIT)
+   ========================= */
+.dark {
+  --bg-main: #020617;
+  --bg-soft: #020617;
+  --panel: rgba(15, 23, 42, 0.9);
+
+  --text-main: #e5e7eb;
+  --text-soft: #9ca3af;
+
+  --border: rgba(31, 58, 51, 0.9);
+  --glass-white: 15, 23, 42;
+}
+
+/* =========================
+   BASE
+   ========================= */
+html,
+body {
+  height: 100%;
+  
+}
+
+body {
+  background: var(--bg-main);
+  color: var(--text-main);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+}
+
+/* =========================
+   GLASS CARD (ENTERPRISE)
+   ========================= */
+.glass-card {
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+
+  background: rgba(var(--glass-white), 0.6);
+  border: 1px solid var(--border);
+  border-radius: 0;
+
+  box-shadow:
+    0 16px 32px rgba(0, 0, 0, 0.06);
+
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.2s ease;
+}
+
+.dark .glass-card {
+  background: rgba(15, 23, 42, 0.85);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.45);
+}
+
+.glass-card:hover {
+  border-color: rgba(var(--emerald-main), 0.4);
+}
+
+/* =========================
+   DASHBOARD
+   ========================= */
+.dashboard {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    180deg,
+    var(--bg-soft),
+    var(--bg-main)
+  );
+}
+
+/* =========================
+   DASHBOARD HEADER
+   ========================= */
+.dashboard-header {
+  padding: 18px 32px;
+  background: var(--panel);
+  backdrop-filter: blur(14px) saturate(130%);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
+  border-bottom: 1px solid var(--border);
+}
+
+/* =========================
+   DASHBOARD BODY
+   ========================= */
+.dashboard-body {
+  padding: 40px;
+  position: relative;
+  z-index: 2;
+}
+
+/* =========================
+   TEXT HELPERS
+   ========================= */
+.text-main {
+  color: var(--text-main);
+}
+
+.text-soft {
+  color: var(--text-soft);
+}
+
+/* =========================
+   SCROLLBAR
+   ========================= */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* =========================
+   ACCESSIBILITY
+   ========================= */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
