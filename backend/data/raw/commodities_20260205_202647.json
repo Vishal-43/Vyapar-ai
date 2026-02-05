@@ -1,0 +1,160 @@
+{
+  "commodities": [
+    {
+      "name": "Wheat",
+      "category": "Cereals",
+      "unit": "Quintal"
+    },
+    {
+      "name": "Rice",
+      "category": "Cereals",
+      "unit": "Quintal"
+    },
+    {
+      "name": "Basmati Rice",
+      "category": "Cereals",
+      "unit": "Quintal"
+    },
+    {
+      "name": "Maize",
+      "category": "Cereals",
+      "unit": "Quintal"
+    },
+    {
+      "name": "Bajra",
+      "category": "Cereals",
+      "unit": "Quintal"
+    },
+    {
+      "name": "Jowar",
+      "category": "Cereals",
+      "unit": "Quintal"
+    },
+    {
+      "name": "Barley",
+      "category": "Cereals",
+      "unit": "Quintal"
+    },
+    {
+      "name": "Ragi",
+      "category": "Cereals",
+      "unit": "Quintal"
+    },
+    {
+      "name": "Moong Dal",
+      "category": "Pulses",
+      "unit": "Quintal"
+    },
+    {
+      "name": "Chana",
+      "category": "Pulses",
+      "unit": "Quintal"
+    },
+    {
+      "name": "Toor Dal",
+      "category": "Pulses",
+      "unit": "Quintal"
+    },
+    {
+      "name": "Urad Dal",
+      "category": "Pulses",
+      "unit": "Quintal"
+    },
+    {
+      "name": "Masoor Dal",
+      "category": "Pulses",
+      "unit": "Quintal"
+    },
+    {
+      "name": "Rajma",
+      "category": "Pulses",
+      "unit": "Quintal"
+    },
+    {
+      "name": "Lobia",
+      "category": "Pulses",
+      "unit": "Quintal"
+    },
+    {
+      "name": "Groundnut",
+      "category": "Oilseeds",
+      "unit": "Quintal"
+    },
+    {
+      "name": "Soybean",
+      "category": "Oilseeds",
+      "unit": "Quintal"
+    },
+    {
+      "name": "Mustard",
+      "category": "Oilseeds",
+      "unit": "Quintal"
+    },
+    {
+      "name": "Sunflower",
+      "category": "Oilseeds",
+      "unit": "Quintal"
+    },
+    {
+      "name": "Sesame",
+      "category": "Oilseeds",
+      "unit": "Quintal"
+    },
+    {
+      "name": "Safflower",
+      "category": "Oilseeds",
+      "unit": "Quintal"
+    },
+    {
+      "name": "Linseed",
+      "category": "Oilseeds",
+      "unit": "Quintal"
+    },
+    {
+      "name": "Castor Seed",
+      "category": "Oilseeds",
+      "unit": "Quintal"
+    },
+    {
+      "name": "Turmeric",
+      "category": "Spices",
+      "unit": "Quintal"
+    },
+    {
+      "name": "Coriander Seeds",
+      "category": "Spices",
+      "unit": "Quintal"
+    },
+    {
+      "name": "Cumin",
+      "category": "Spices",
+      "unit": "Quintal"
+    },
+    {
+      "name": "Black Pepper",
+      "category": "Spices",
+      "unit": "Quintal"
+    },
+    {
+      "name": "Cardamom",
+      "category": "Spices",
+      "unit": "Quintal"
+    },
+    {
+      "name": "Clove",
+      "category": "Spices",
+      "unit": "Quintal"
+    },
+    {
+      "name": "Cotton",
+      "category": "Cash Crops",
+      "unit": "Quintal"
+    },
+    {
+      "name": "Jute",
+      "category": "Cash Crops",
+      "unit": "Quintal"
+    }
+  ],
+  "scraped_at": "20260205_202647"
+}

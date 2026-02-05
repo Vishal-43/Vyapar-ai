@@ -2,7 +2,7 @@
 from typing import Generator, AsyncGenerator, Optional
 
 from loguru import logger
-from sqlalchemy import create_engine, event
+from sqlalchemy import create_engine, event, text
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import NullPool, QueuePool
@@ -48,9 +48,9 @@ async def init_async_db() -> None:
     
     async with async_engine.begin() as conn:
         if "sqlite" in settings.database_url:
-            await conn.run_sync(lambda c: c.execute("PRAGMA journal_mode=WAL;"))
-            await conn.run_sync(lambda c: c.execute("PRAGMA synchronous=NORMAL;"))
-            await conn.run_sync(lambda c: c.execute("PRAGMA busy_timeout=30000;"))
+            await conn.run_sync(lambda c: c.execute(text("PRAGMA journal_mode=WAL;")))
+            await conn.run_sync(lambda c: c.execute(text("PRAGMA synchronous=NORMAL;")))
+            await conn.run_sync(lambda c: c.execute(text("PRAGMA busy_timeout=30000;")))
         await conn.run_sync(Base.metadata.create_all)
     
     logger.info("Async database initialized successfully")

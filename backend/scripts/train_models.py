@@ -63,23 +63,15 @@ def load_training_data(
             # Fallback: load from data/raw JSON
             logger.warning("No training data in DB, loading from raw data folder...")
             data_dir = Path(__file__).parent.parent / 'data' / 'raw'
-            # Use truncated file for fast training if available
-            truncated_file = data_dir / "market_prices_truncated.json"
-            if truncated_file.exists():
-                logger.info(f"Loading data from {truncated_file} (truncated for fast training)")
-                import json
-                with open(truncated_file, 'r') as f:
-                    data = json.load(f)
-            else:
-                price_files = list(data_dir.glob("market_prices_*.json"))
-                if not price_files:
-                    logger.error(f"No data files found in {data_dir}")
-                    return None, None, None, None
-                latest_file = max(price_files, key=lambda p: p.stat().st_mtime)
-                logger.info(f"Loading data from {latest_file}")
-                import json
-                with open(latest_file, 'r') as f:
-                    data = json.load(f)
+            price_files = [f for f in data_dir.glob("market_prices_*.json") if 'truncated' not in f.name]
+            if not price_files:
+                logger.error(f"No data files found in {data_dir}")
+                return None, None, None, None
+            latest_file = max(price_files, key=lambda p: p.stat().st_mtime)
+            logger.info(f"Loading data from {latest_file}")
+            import json
+            with open(latest_file, 'r') as f:
+                data = json.load(f)
             if isinstance(data, list):
                 prices = data
             else:

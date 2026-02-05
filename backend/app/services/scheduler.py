@@ -238,9 +238,10 @@ class DataScheduler:
         
         logger.info("Scheduler started - Scraping at 2:30 AM, 8:00 AM, 2:00 PM daily. Weekly retraining on Sundays at 3:00 AM")
         
-        if run_initial_scrape:
-            import asyncio
-            asyncio.create_task(self._run_initial_scrape())
+        # Disable initial scrape for faster development startup
+        # if run_initial_scrape:
+        #     import asyncio
+        #     asyncio.create_task(self._run_initial_scrape())
 
     def stop(self):
         

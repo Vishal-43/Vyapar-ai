@@ -290,10 +290,13 @@ class SellingStrategyEngine:
         return months_diff * 30
     
     def _calculate_daily_storage_cost(
-        self, storage_info: Dict, quantity: float
+        self, storage_info: Optional[Dict], quantity: float
     ) -> float:
         """Calculate storage cost per day"""
-        cost_per_month = storage_info.get('cost_per_quintal_per_month', 50.0)
+        if storage_info is None:
+            cost_per_month = 50.0  # Default storage cost
+        else:
+            cost_per_month = storage_info.get('cost_per_quintal_per_month', 50.0)
         return (cost_per_month * quantity) / 30.0  # Convert monthly to daily
     
     def _decide_strategy(
@@ -326,7 +329,7 @@ class SellingStrategyEngine:
             )
         
         # Rule 2: Perishable commodity with distant peak
-        if is_perishable and days_to_peak and days_to_peak > max_storage_days:
+        if is_perishable and days_to_peak is not None and days_to_peak > max_storage_days:
             return (
                 StrategyType.IMMEDIATE,
                 f"This commodity is perishable (max storage: {max_storage_days} days). "
@@ -335,7 +338,7 @@ class SellingStrategyEngine:
             )
         
         # Rule 3: Calculate potential profit from waiting
-        if days_to_peak and peak_price:
+        if days_to_peak is not None and peak_price is not None:
             potential_revenue = peak_price * quantity
             current_revenue = current_price * quantity
             storage_cost = storage_cost_per_day * days_to_peak
@@ -430,7 +433,7 @@ class SellingStrategyEngine:
             days_to_wait = min(days_to_peak, 120) if days_to_peak else 90
         
         # Estimate expected price (interpolate to peak)
-        price_gain_ratio = days_to_wait / days_to_peak if days_to_peak > 0 else 0.5
+        price_gain_ratio = days_to_wait / days_to_peak if (days_to_peak is not None and days_to_peak > 0) else 0.5
         expected_price = current_price + ((peak_price or current_price * 1.15) - current_price) * price_gain_ratio
         
         expected_revenue = expected_price * quantity

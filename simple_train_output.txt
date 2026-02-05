@@ -1,0 +1,30 @@
+nohup: ignoring input
+/home/vishal/.local/lib/python3.14/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+Starting simple training test...
+Loading /home/vishal/code/hackethon/kjsomiya/backend/data/raw/market_prices_20260206_010107.json...
+Loaded 3712 records
+Features: (3712, 8), Target: (3712,)
+Train: 3155, Test: 557
+
+Training XGBoost...
+
+XGBoost Results:
+  R²:       0.9973
+  Accuracy: 99.73%
+  MAE:      ₹65.42
+  RMSE:     ₹85.22
+
+Training LightGBM...
+
+LightGBM Results:
+  R²:       0.9971
+  Accuracy: 99.71%
+  MAE:      ₹64.06
+  RMSE:     ₹87.96
+
+==================================================
+Best Accuracy: 99.73%
+Target: 90%+
+==================================================
+✅ SUCCESS!

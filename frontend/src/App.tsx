@@ -20,6 +20,9 @@ import Watchlist from "./pages/Watchlist";
 import SupplyChain from "./pages/SupplyChain";
 import ErrorPage from "./pages/ErrorPage";
 import SellingStrategy from "./pages/SellingStrategy";
+import WeatherRisk from "./pages/WeatherRisk";
+import CropMixOptimizer from "./pages/CropMixOptimizer";
+import DirectBuyerEngine from "./pages/DirectBuyerEngine";
 import AIChatbot from "./components/AIChatbot/AIChatbot";
 import { DataImportProvider } from "./context/DataImportContext";
 import { UserSettingsProvider } from "./context/UserSettingsContext";
@@ -135,6 +138,45 @@ function App() {
             <>
               <SignedIn>
                 <SellingStrategy />
+              </SignedIn>
+              <SignedOut>
+                <Navigate to="/auth" replace />
+              </SignedOut>
+            </>
+          }
+        />
+        <Route
+          path="/dashboard/weather-risk"
+          element={
+            <>
+              <SignedIn>
+                <WeatherRisk />
+              </SignedIn>
+              <SignedOut>
+                <Navigate to="/auth" replace />
+              </SignedOut>
+            </>
+          }
+        />
+        <Route
+          path="/dashboard/crop-mix-optimizer"
+          element={
+            <>
+              <SignedIn>
+                <CropMixOptimizer />
+              </SignedIn>
+              <SignedOut>
+                <Navigate to="/auth" replace />
+              </SignedOut>
+            </>
+          }
+        />
+        <Route
+          path="/dashboard/direct-buyer-engine"
+          element={
+            <>
+              <SignedIn>
+                <DirectBuyerEngine />
               </SignedIn>
               <SignedOut>
                 <Navigate to="/auth" replace />

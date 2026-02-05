@@ -44,6 +44,7 @@ from app.models.schemas import (
     ImpactData,
     RecommendationRow,
 )
+from app.engines.selling_strategy.strategy_models import SellingStrategyInput, SellingRecommendation
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -1029,9 +1030,9 @@ async def get_data_status(
 
 @router.post("/selling-strategies/get-strategy")
 async def get_selling_strategy(
-    request: "SellingStrategyInput",
+    input_data: SellingStrategyInput,
     commodity_repo: CommodityRepository = Depends(get_commodity_repo),
-) -> "SellingRecommendation":
+) -> SellingRecommendation:
     """
     Get selling strategy recommendation for farmers
     
@@ -1040,15 +1041,15 @@ async def get_selling_strategy(
     """
     try:
         from fastapi.concurrency import run_in_threadpool
-        from app.engines.selling_strategy import SellingStrategyEngine, SellingStrategyInput, SellingRecommendation
+        from app.engines.selling_strategy import SellingStrategyEngine
         from app.database.connection import get_sync_session
         
         # Validate commodity exists
-        commodity = await commodity_repo.get_by_id(request.commodity_id)
+        commodity = await commodity_repo.get_by_id(input_data.commodity_id)
         if not commodity:
             raise HTTPException(
                 status_code=404,
-                detail=f"Commodity with ID {request.commodity_id} not found"
+                detail=f"Commodity with ID {input_data.commodity_id} not found"
             )
         
         def _run_strategy():
@@ -1056,14 +1057,14 @@ async def get_selling_strategy(
             session = next(session_gen)
             try:
                 engine = SellingStrategyEngine(session)
-                return engine.get_selling_strategy(request)
+                return engine.get_selling_strategy(input_data)
             finally:
                 session_gen.close()
 
         recommendation = await run_in_threadpool(_run_strategy)
         
         logger.info(
-            f"Selling strategy generated for {request.commodity_name}: "
+            f"Selling strategy generated for {input_data.commodity_name}: "
             f"{recommendation.strategy.value} (confidence: {recommendation.confidence_score:.2f})"
         )
         
