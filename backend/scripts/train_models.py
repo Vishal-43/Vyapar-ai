@@ -32,48 +32,57 @@ def load_training_data(
 
     logger.info(f"Loading training data (last {days} days)...")
 
+    # Try loading from database
     init_sync_db()
     session = next(get_sync_session())
-
     try:
         query = session.query(MarketPrice)
-
         if commodity_id:
             query = query.filter(MarketPrice.commodity_id == commodity_id)
-
         if market_id:
             query = query.filter(MarketPrice.market_id == market_id)
-
         from datetime import datetime, timedelta
-
         start_date = datetime.now().date() - timedelta(days=days)
         query = query.filter(MarketPrice.date >= start_date)
-
         prices = query.order_by(MarketPrice.date).all()
-
         logger.info(f"Loaded {len(prices)} price records")
-
         data_list = []
         for price in prices:
-            data_list.append(
-                {
-                    'date': price.date,
-                    'commodity_id': price.commodity_id,
-                    'market_id': price.market_id,
-                    'price': price.price,
-                    'min_price': price.min_price,
-                    'max_price': price.max_price,
-                    'modal_price': price.modal_price,
-                    'arrival': price.arrival or 0,
-                }
-            )
-
+            data_list.append({
+                'date': price.date,
+                'commodity_id': price.commodity_id,
+                'market_id': price.market_id,
+                'price': price.price,
+                'min_price': price.min_price,
+                'max_price': price.max_price,
+                'modal_price': price.modal_price,
+                'arrival': price.arrival or 0,
+            })
         df = pd.DataFrame(data_list)
-
         if len(df) == 0:
-            logger.error("No training data available")
-            return None, None, None
-
+            # Fallback: load from data/raw JSON
+            logger.warning("No training data in DB, loading from raw data folder...")
+            data_dir = Path(__file__).parent.parent / 'data' / 'raw'
+            price_files = list(data_dir.glob("market_prices_*.json"))
+            if not price_files:
+                logger.error(f"No data files found in {data_dir}")
+                return None, None, None, None
+            latest_file = max(price_files, key=lambda p: p.stat().st_mtime)
+            logger.info(f"Loading data from {latest_file}")
+            import json
+            with open(latest_file, 'r') as f:
+                data = json.load(f)
+            if isinstance(data, list):
+                prices = data
+            else:
+                prices = data.get('prices', data)
+            df = pd.DataFrame(prices)
+            logger.info(f"Loaded {len(df)} records from raw data")
+            # Add factorized columns if missing
+            if 'commodity_id' not in df.columns and 'commodity' in df.columns:
+                df['commodity_id'] = pd.factorize(df['commodity'])[0]
+            if 'market_id' not in df.columns and 'market' in df.columns:
+                df['market_id'] = pd.factorize(df['market'])[0]
         preprocessor = preprocessor or DataPreprocessor()
         features, target = preprocessor.prepare_training_data(
             df,
@@ -81,9 +90,7 @@ def load_training_data(
             date_col='date',
             numeric_cols=['min_price', 'max_price', 'modal_price', 'arrival', 'commodity_id', 'market_id'],
         )
-
         return features, target, df, preprocessor
-
     finally:
         session.close()
 
@@ -109,7 +116,7 @@ def train_models(
 ) -> Dict[str, Any]:
 
     if models is None:
-        models = ['xgboost', 'lightgbm', 'catboost', 'random_forest']
+        models = ['xgboost', 'lightgbm', 'catboost', 'random_forest', 'svm']
 
     preprocessor = DataPreprocessor()
     X, y, df, preprocessor = load_training_data(commodity_id, market_id, preprocessor=preprocessor)
@@ -214,7 +221,7 @@ def main():
         default='train',
         help='Action to perform',
     )
-    parser.add_argument('--model', help='Specific model to train (xgboost, lightgbm, catboost, random_forest)')
+    parser.add_argument('--model', help='Specific model to train (xgboost, lightgbm, catboost, random_forest, svm, gpr)')
     parser.add_argument('--commodity', type=int, help='Commodity ID to train on')
     parser.add_argument('--market', type=int, help='Market ID to train on')
     parser.add_argument('--days', type=int, default=365, help='Days of historical data to use')

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { ChevronDown, ChevronRight, BarChart3, Box, TrendingUp, Activity, Zap, Target, Upload, Settings } from "lucide-react";
+import { ChevronDown, ChevronRight, BarChart3, Box, TrendingUp, Activity, Zap, Target, Upload, Settings, Sparkles } from "lucide-react";
 import { navigationSections } from "../../libs/navigationConfig";
 import type { NavItem, NavSection } from "../../libs/navigationConfig";
 
@@ -11,6 +11,7 @@ const iconMap: Record<string, React.ReactNode> = {
   "model-accuracy": <Activity className="w-5 h-5" />,
   "buysell-alerts": <Zap className="w-5 h-5" />,
   "recommendations": <Target className="w-5 h-5" />,
+  "selling-strategy": <Sparkles className="w-5 h-5" />,
   "import-data": <Upload className="w-5 h-5" />,
   "settings": <Settings className="w-5 h-5" />,
 };

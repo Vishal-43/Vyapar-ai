@@ -30,10 +30,17 @@ class AgriculturalPredictor:
         self.ensemble.load_models(model_paths, preprocessor_path)
         if preprocessor_path:
             import joblib
-            self.preprocessor = joblib.load(preprocessor_path)
+            preprocessor_data = joblib.load(preprocessor_path)
+            if isinstance(preprocessor_data, dict):
+                self.preprocessor = preprocessor_data.get('preprocessor', preprocessor_data)
+            else:
+                self.preprocessor = preprocessor_data
 
     def load_latest_models(self) -> None:
         self.ensemble.load_latest_models()
+        if getattr(self.ensemble, "preprocessor", None) is not None:
+            if hasattr(self.ensemble.preprocessor, "prepare_prediction_data"):
+                self.preprocessor = self.ensemble.preprocessor
 
     def prepare_prediction_input(
         self,

@@ -40,6 +40,7 @@ export default function PriceChart() {
   const [selectedRange, setSelectedRange] = useState<TimeRange>(TIME_RANGES[2]); // Default 1M
   const [isLoading, setIsLoading] = useState(true);
   const [priceChange, setPriceChange] = useState<{ value: number; percent: number }>({ value: 0, percent: 0 });
+  const [notice, setNotice] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPriceHistory = async () => {
@@ -60,6 +61,7 @@ export default function PriceChart() {
         if (res.ok) {
           const data = await res.json();
           setPriceData(data.prices || []);
+          setNotice(data.notice || null);
 
           // Calculate price change
           if (data.prices && data.prices.length >= 2) {
@@ -72,6 +74,7 @@ export default function PriceChart() {
         }
       } catch (error) {
         console.error("Failed to fetch price history:", error);
+        setNotice("Unable to fetch price history right now.");
       } finally {
         setIsLoading(false);
       }
@@ -139,8 +142,11 @@ export default function PriceChart() {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
         </div>
       ) : priceData.length === 0 ? (
-        <div className="h-80 flex items-center justify-center text-gray-500">
-          Select a commodity and market to view price history
+        <div className="h-80 flex flex-col items-center justify-center text-gray-500 gap-2 text-sm">
+          <span>Select a commodity and market to view price history</span>
+          {notice && (
+            <span className="text-xs text-amber-600 dark:text-amber-400">{notice}</span>
+          )}
         </div>
       ) : (
         <div className="h-80 min-h-[320px]">
@@ -244,6 +250,12 @@ export default function PriceChart() {
               )}
             </AreaChart>
           </ResponsiveContainer>
+        </div>
+      )}
+
+      {notice && priceData.length > 0 && (
+        <div className="mt-3 text-xs text-amber-600 dark:text-amber-400">
+          {notice}
         </div>
       )}
 

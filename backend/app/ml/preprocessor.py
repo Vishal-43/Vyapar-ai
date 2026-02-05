@@ -215,6 +215,10 @@ class DataPreprocessor:
 
         temporal_features = self.extract_temporal_features(data_processed[date_col])
 
+        # Calculate trader features BEFORE encoding categorical columns
+        # so we can access original string values
+        trader_features = self.calculate_trader_features(data_processed)
+
         if categorical_cols:
             data_processed = self.encode_categorical(
                 data_processed, categorical_cols, fit=True
@@ -236,11 +240,15 @@ class DataPreprocessor:
         
         features = pd.concat([features, temporal_features], axis=1)
         
-        trader_features = self.calculate_trader_features(features)
+        # Concat trader features (calculated before encoding)
         features = pd.concat([features, trader_features], axis=1)
         
+        # Fill any NaNs before scaling
+        features = features.fillna(0)
+        
         for col in numeric_cols:
-            features[col] = self.scale_features(features[col].values, col, fit=True)
+            if col in features.columns:
+                features[col] = self.scale_features(features[col].values, col, fit=True)
 
         self.feature_names = features.columns.tolist()
         self.numeric_features = numeric_cols
@@ -248,9 +256,12 @@ class DataPreprocessor:
 
         target = data_processed[target_col].values
 
+        # Convert to numeric
         features = features.apply(pd.to_numeric, errors="coerce")
+        features = features.fillna(0)  # Fill any remaining NaNs
 
-        valid_idx = ~(pd.isna(features).any(axis=1) | pd.isna(target))
+        # Only filter rows where target is NaN
+        valid_idx = ~pd.isna(target)
         features = features.to_numpy()[valid_idx]
         target = target[valid_idx]
 
@@ -300,9 +311,17 @@ class DataPreprocessor:
             'sunflower': 6, 'sesame': 12, 'cotton': 12, 'jute': 12,
         }
         if 'commodity' in data.columns:
-            trader_features['commodity_shelf_life'] = data['commodity'].str.lower().str.replace(' ', '_').map(
-                lambda x: commodity_shelf_life.get(x, 3) / 12.0
-            )
+            try:
+                # Try to handle string commodities
+                if data['commodity'].dtype == 'object':
+                    trader_features['commodity_shelf_life'] = data['commodity'].str.lower().str.replace(' ', '_').map(
+                        lambda x: commodity_shelf_life.get(x, 3) / 12.0
+                    )
+                else:
+                    # Already encoded, use default
+                    trader_features['commodity_shelf_life'] = 0.5
+            except:
+                trader_features['commodity_shelf_life'] = 0.5
         else:
             trader_features['commodity_shelf_life'] = 0.5
         
@@ -401,6 +420,26 @@ class DataPreprocessor:
         else:
             trader_features['harvest_season'] = 0.0
         
+        # Weather features if available
+        weather_cols = [
+            'weather_temperature', 'weather_humidity', 'weather_rainfall',
+            'weather_temp_range', 'weather_heat_stress', 'weather_cold_stress',
+            'weather_drought_indicator', 'weather_flood_risk',
+            'weather_uncertainty', 'weather_temp_volatility', 'weather_rainfall_volatility'
+        ]
+        for col in weather_cols:
+            if col in data.columns:
+                trader_features[f'{col}_impact'] = data[col]
+        
+        # Weather-price interaction features
+        if 'weather_temperature' in data.columns and 'price' in data.columns:
+            trader_features['temp_price_interaction'] = data['weather_temperature'] * data.get('seasonal_demand_index', 1.0)
+        
+        if 'weather_rainfall' in data.columns:
+            trader_features['rainfall_supply_shock'] = data['weather_rainfall'].apply(
+                lambda r: 1.0 if r > 50 else 0.0
+            )
+        
         if 'price' in data.columns and len(data) > 90:
             trader_features['price_trend_90d'] = data.groupby(['commodity_id'])['price'].transform(
                 lambda x: (x.rolling(window=min(30, len(x)), min_periods=1).mean() - 
@@ -424,6 +463,7 @@ class DataPreprocessor:
         else:
             trader_features['supply_consistency'] = 0.5
         
+        return trader_features
         if 'price' in data.columns and len(data) > 60:
             trader_features['price_deviation_60d'] = data.groupby(['commodity_id'])['price'].transform(
                 lambda x: ((x - x.rolling(window=min(60, len(x)), min_periods=1).mean()) / 
@@ -566,7 +606,7 @@ class DataPreprocessor:
 
         features = pd.DataFrame()
         
-        numeric_cols = ['price', 'arrival', 'commodity_id', 'market_id']
+        numeric_cols = ['price', 'min_price', 'max_price', 'modal_price', 'arrival', 'commodity_id', 'market_id']
         for col in numeric_cols:
             if col in data_processed.columns:
                 features[col] = data_processed[col]
@@ -589,23 +629,32 @@ class DataPreprocessor:
         trader_features = self.calculate_trader_features(features)
         features = pd.concat([features, trader_features], axis=1)
         
+        # Use the exact same features as during training (fallback to standard list)
         standard_features = [
+            'price',
+            'min_price',
+            'max_price',
+            'modal_price',
+            'arrival',
             'commodity_id',
             'market_id',
-            'arrival',
             'day_of_week',
+            'day_of_month',
             'month',
+            'quarter',
+            'week_of_year',
+            'day_of_year',
             'season',
+            'month_sin',
+            'month_cos',
+            'day_sin',
+            'day_cos',
             'is_festival',
             'festival_effect',
+            'days_to_festival',
             'holiday_proximity',
             'monsoon_factor',
             'harvest_season',
-            'price',
-            'week_of_year',
-            'quarter',
-            'month_sin',
-            'month_cos',
             'price_volatility',
             'arrival_momentum',
             'weekend_effect',
@@ -617,17 +666,26 @@ class DataPreprocessor:
             'supply_shock_indicator',
             'demand_trend',
             'market_competition_index',
-            'storage_cost_factor',
-            'transportation_difficulty',
+            'volatility_14d',
+            'momentum_7d',
+            'rsi_30d',
+            'supply_volatility',
+            'price_elasticity',
+            'is_peak_season',
+            'price_trend_90d',
+            'market_premium_factor',
         ]
-        
-        for col in standard_features:
+
+        model_features = self.feature_names if self.feature_names else standard_features
+
+        for col in model_features:
             if col not in features.columns:
                 features[col] = 0.0
+
+        features = features[model_features].copy()
         
-        features = features[standard_features].copy()
-        
-        for col in ['price', 'arrival']:
+        # Scale numeric features
+        for col in ['price', 'min_price', 'max_price', 'modal_price', 'arrival']:
             if col in features.columns:
                 try:
                     values = features[col].values
@@ -640,7 +698,7 @@ class DataPreprocessor:
         features = features.fillna(features.mean(numeric_only=True))
         features = features.fillna(0.0)
         
-        self.feature_names = standard_features
+        self.feature_names = model_features
         
         features_array = features.values
 

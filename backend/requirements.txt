@@ -3,7 +3,7 @@ uvicorn[standard]
 pydantic
 pydantic-settings
 python-multipart
-scikit-learn
+scikit-learn>=1.3.0
 xgboost
 lightgbm
 catboost
@@ -48,5 +48,6 @@ isort
 mkdocs
 mkdocs-material
 ipython
+scipy
 jupyter
 ipykernel

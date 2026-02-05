@@ -9,6 +9,9 @@ from loguru import logger
 from sklearn.model_selection import cross_val_score, GridSearchCV, TimeSeriesSplit
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score, mean_absolute_percentage_error
+from sklearn.svm import SVR
+from sklearn.gaussian_process import GaussianProcessRegressor
+from sklearn.gaussian_process.kernels import RBF, WhiteKernel, ConstantKernel as C, Matern, RationalQuadratic
 
 import xgboost as xgb
 import lightgbm as lgb
@@ -210,6 +213,129 @@ class ModelTrainer:
         self.models['random_forest'] = grid_search.best_estimator_
         return grid_search.best_estimator_
 
+    def train_svm(
+        self, X_train: np.ndarray, y_train: np.ndarray, cv_splits: int = 3
+    ) -> SVR:
+        """Train Support Vector Machine (SVM) Regressor with RBF kernel for non-linear price patterns."""
+        logger.info("Building SVM model with RBF kernel for complex price patterns")
+
+        # SVM is computationally expensive, use smaller sample for grid search if dataset is large
+        sample_size = min(5000, len(X_train))
+        if len(X_train) > sample_size:
+            indices = np.random.choice(len(X_train), sample_size, replace=False)
+            X_sample, y_sample = X_train[indices], y_train[indices]
+            logger.info(f"Using {sample_size} samples for SVM hyperparameter tuning")
+        else:
+            X_sample, y_sample = X_train, y_train
+
+        svm_model = SVR(
+            kernel='rbf',
+            C=100.0,
+            epsilon=0.1,
+            gamma='scale',
+            cache_size=1000,
+        )
+
+        param_grid = {
+            'C': [10, 100, 500],
+            'epsilon': [0.01, 0.1, 0.2],
+            'gamma': ['scale', 'auto'],
+        }
+
+        tscv = TimeSeriesSplit(n_splits=cv_splits)
+        grid_search = GridSearchCV(
+            svm_model,
+            param_grid,
+            cv=tscv,
+            scoring='r2',
+            n_jobs=-1,
+            verbose=1,
+        )
+
+        grid_search.fit(X_sample, y_sample)
+        
+        # Train final model on full dataset with best parameters
+        best_svm = grid_search.best_estimator_
+        if len(X_train) > sample_size:
+            logger.info("Training final SVM model on complete dataset")
+            best_svm.fit(X_train, y_train)
+        
+        logger.info(
+            f"SVM model trained with {grid_search.best_score_:.2%} validation accuracy"
+        )
+
+        self.models['svm'] = best_svm
+        return best_svm
+
+    def train_gpr(
+        self, X_train: np.ndarray, y_train: np.ndarray, cv_splits: int = 3
+    ) -> GaussianProcessRegressor:
+        """Train Gaussian Process Regressor for uncertainty quantification in price predictions."""
+        logger.info("Building Gaussian Process Regressor with uncertainty estimation")
+
+        # GPR is very computationally expensive, use smaller sample
+        sample_size = min(2000, len(X_train))
+        if len(X_train) > sample_size:
+            indices = np.random.choice(len(X_train), sample_size, replace=False)
+            X_sample, y_sample = X_train[indices], y_train[indices]
+            logger.info(f"Using {sample_size} samples for GPR training (computational efficiency)")
+        else:
+            X_sample, y_sample = X_train, y_train
+
+        # Define kernel combinations for price modeling
+        kernels = [
+            C(1.0, (1e-3, 1e3)) * RBF(length_scale=1.0, length_scale_bounds=(1e-2, 1e2)) + WhiteKernel(noise_level=1.0),
+            C(1.0, (1e-3, 1e3)) * Matern(length_scale=1.0, nu=1.5) + WhiteKernel(noise_level=1.0),
+            C(1.0, (1e-3, 1e3)) * RationalQuadratic(alpha=1.0, length_scale=1.0) + WhiteKernel(noise_level=1.0),
+        ]
+
+        best_score = -np.inf
+        best_gpr = None
+
+        for idx, kernel in enumerate(kernels):
+            try:
+                logger.info(f"Testing GPR with kernel {idx + 1}/{len(kernels)}")
+                gpr_model = GaussianProcessRegressor(
+                    kernel=kernel,
+                    alpha=1e-6,
+                    normalize_y=True,
+                    n_restarts_optimizer=2,
+                    random_state=42,
+                )
+                
+                gpr_model.fit(X_sample, y_sample)
+                
+                # Evaluate on sample
+                score = gpr_model.score(X_sample, y_sample)
+                logger.info(f"Kernel {idx + 1} achieved R² score: {score:.4f}")
+                
+                if score > best_score:
+                    best_score = score
+                    best_gpr = gpr_model
+                    
+            except Exception as e:
+                logger.warning(f"Kernel {idx + 1} failed to converge: {e}")
+                continue
+
+        if best_gpr is None:
+            # Fallback to simplest kernel
+            logger.warning("Using fallback GPR kernel")
+            kernel = C(1.0) * RBF(1.0) + WhiteKernel(noise_level=1.0)
+            best_gpr = GaussianProcessRegressor(
+                kernel=kernel,
+                alpha=1e-6,
+                normalize_y=True,
+                random_state=42,
+            )
+            best_gpr.fit(X_sample, y_sample)
+
+        logger.info(
+            f"GPR model trained with {best_score:.2%} accuracy and uncertainty estimation enabled"
+        )
+
+        self.models['gpr'] = best_gpr
+        return best_gpr
+
     def evaluate_model(
         self, model: Any, X_test: np.ndarray, y_test: np.ndarray, model_name: str
     ) -> Dict[str, float]:
@@ -277,7 +403,7 @@ class ModelTrainer:
             )
 
         if models_to_train is None:
-            models_to_train = ['xgboost', 'lightgbm', 'catboost', 'random_forest']
+            models_to_train = ['xgboost', 'lightgbm', 'catboost', 'random_forest', 'svm', 'gpr']
 
         results = {}
 
@@ -292,6 +418,10 @@ class ModelTrainer:
                 model = self.train_catboost(X_train, y_train)
             elif model_name == 'random_forest':
                 model = self.train_random_forest(X_train, y_train)
+            elif model_name == 'svm':
+                model = self.train_svm(X_train, y_train)
+            elif model_name == 'gpr':
+                model = self.train_gpr(X_train, y_train)
             else:
                 logger.warning(f"Unknown model: {model_name}")
                 continue

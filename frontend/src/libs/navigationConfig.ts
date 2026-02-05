@@ -72,6 +72,12 @@ export const navigationSections: NavSection[] = [
         path: "/dashboard/recommendations",
       },
       {
+        id: "selling-strategy",
+        label: "Selling Strategy",
+        icon: null,
+        path: "/dashboard/selling-strategy",
+      },
+      {
         id: "import-data",
         label: "Import Data",
         icon: null, // Will use FiUpload

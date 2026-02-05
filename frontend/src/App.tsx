@@ -19,6 +19,7 @@ import Community from "./pages/Community";
 import Watchlist from "./pages/Watchlist";
 import SupplyChain from "./pages/SupplyChain";
 import ErrorPage from "./pages/ErrorPage";
+import SellingStrategy from "./pages/SellingStrategy";
 import AIChatbot from "./components/AIChatbot/AIChatbot";
 import { DataImportProvider } from "./context/DataImportContext";
 import { UserSettingsProvider } from "./context/UserSettingsContext";
@@ -127,6 +128,19 @@ function App() {
               </SignedOut>
             </>
           } 
+        />
+        <Route
+          path="/dashboard/selling-strategy"
+          element={
+            <>
+              <SignedIn>
+                <SellingStrategy />
+              </SignedIn>
+              <SignedOut>
+                <Navigate to="/auth" replace />
+              </SignedOut>
+            </>
+          }
         />
         <Route
           path="/dashboard/community"

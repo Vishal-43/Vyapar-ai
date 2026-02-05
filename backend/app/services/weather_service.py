@@ -2,7 +2,8 @@
 
 import httpx
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Dict, List, Any
+import numpy as np
 from loguru import logger
 from app.config import settings
 
@@ -294,6 +295,98 @@ class WeatherService:
             "severity": severity,
             "summary": f"{len(impacts)} weather factors affecting prices"
         }
+
+    def extract_weather_features(self, weather_data: Dict[str, Any]) -> Dict[str, float]:
+        """Extract weather features for ML models."""
+        temp = weather_data.get("temperature", 25)
+        temp_min = weather_data.get("temp_min", temp - 3)
+        temp_max = weather_data.get("temp_max", temp + 3)
+        
+        return {
+            'weather_temperature': float(temp),
+            'weather_temp_min': float(temp_min),
+            'weather_temp_max': float(temp_max),
+            'weather_temp_range': float(temp_max - temp_min),
+            'weather_humidity': float(weather_data.get('humidity', 50)),
+            'weather_pressure': float(weather_data.get('pressure', 1013)),
+            'weather_wind_speed': float(weather_data.get('wind_speed', 0)),
+            'weather_rainfall': float(weather_data.get('rain', 0)),
+            'weather_cloudiness': float(weather_data.get('clouds', 0)),
+            'weather_heat_stress': float(max(0, temp - 35)),
+            'weather_cold_stress': float(max(0, 10 - temp)),
+            'weather_drought_indicator': 1.0 if weather_data.get('rain', 0) < 2 else 0.0,
+            'weather_flood_risk': 1.0 if weather_data.get('rain', 0) > 50 else 0.0,
+        }
+
+    def calculate_atmospheric_uncertainty(
+        self, 
+        forecast_data: List[Dict[str, Any]]
+    ) -> Dict[str, float]:
+        """Calculate uncertainty metrics from weather forecast."""
+        if not forecast_data:
+            return {
+                'temp_uncertainty': 0.0,
+                'rainfall_uncertainty': 0.0,
+                'overall_weather_uncertainty': 0.0,
+                'temp_forecast_std': 0.0,
+                'rainfall_forecast_std': 0.0,
+            }
+        
+        temps = [f.get('temperature', 25) for f in forecast_data]
+        rainfalls = [f.get('rain_probability', 0) / 100 * 10 for f in forecast_data]  # Estimate mm
+        
+        temp_std = float(np.std(temps))
+        rainfall_std = float(np.std(rainfalls))
+        rainfall_mean = float(np.mean(rainfalls))
+        rainfall_cv = rainfall_std / (rainfall_mean + 1e-6) if rainfall_mean > 0 else 0
+        
+        # Normalize uncertainties to 0-1 scale
+        temp_uncertainty = min(1.0, temp_std / 10)  # 10°C std = high uncertainty
+        rainfall_uncertainty = min(1.0, rainfall_cv / 2)  # CV of 2 = high uncertainty
+        
+        overall_uncertainty = (temp_uncertainty + rainfall_uncertainty) / 2
+        
+        return {
+            'temp_uncertainty': float(temp_uncertainty),
+            'rainfall_uncertainty': float(rainfall_uncertainty),
+            'overall_weather_uncertainty': float(overall_uncertainty),
+            'temp_forecast_std': float(temp_std),
+            'rainfall_forecast_std': float(rainfall_std),
+        }
+
+    async def get_weather_for_prediction(
+        self, 
+        state: str,
+        include_forecast: bool = True
+    ) -> Dict[str, Any]:
+        """Get comprehensive weather data for price prediction."""
+        current_weather = await self.get_current_weather(state)
+        weather_features = self.extract_weather_features(current_weather)
+        
+        result = {
+            'current': current_weather,
+            'features': weather_features,
+            'uncertainty': {'overall_weather_uncertainty': 0.0}
+        }
+        
+        if include_forecast:
+            forecast = await self.get_forecast(state, days=7)
+            uncertainty = self.calculate_atmospheric_uncertainty(forecast)
+            result['forecast'] = forecast
+            result['uncertainty'] = uncertainty
+            
+            # Add uncertainty features
+            weather_features.update({
+                'weather_uncertainty': uncertainty['overall_weather_uncertainty'],
+                'weather_temp_volatility': uncertainty['temp_uncertainty'],
+                'weather_rainfall_volatility': uncertainty['rainfall_uncertainty'],
+            })
+        
+        logger.info(f"Weather features for {state}: temp={current_weather['temperature']:.1f}°C, "
+                   f"rainfall={current_weather.get('rain', 0):.1f}mm, "
+                   f"uncertainty={result['uncertainty']['overall_weather_uncertainty']:.2%}")
+        
+        return result
 
 
 # Singleton instance

@@ -113,7 +113,7 @@ class EnsembleManager:
                 try:
                     ensemble_data = joblib.load(str(latest_ensemble))
                     if isinstance(ensemble_data, dict):
-                        for model_name in ['random_forest', 'gradient_boosting', 'xgboost', 'lightgbm', 'catboost']:
+                        for model_name in ['random_forest', 'gradient_boosting', 'xgboost', 'lightgbm', 'catboost', 'svm', 'gpr']:
                             if model_name in ensemble_data:
                                 self.models[model_name] = ensemble_data[model_name]
                         self.artifact_info = ensemble_data
@@ -128,7 +128,7 @@ class EnsembleManager:
                     logger.error(f"Failed to load ensemble: {e}")
 
         if not self.models:
-            model_types = ['random_forest', 'gradient_boosting', 'xgboost', 'lightgbm', 'catboost']
+            model_types = ['random_forest', 'gradient_boosting', 'xgboost', 'lightgbm', 'catboost', 'svm', 'gpr']
             model_paths = {}
 
             for model_type in model_types:

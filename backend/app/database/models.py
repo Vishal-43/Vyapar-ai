@@ -347,3 +347,81 @@ class Recommendation(Base):
 
     def __repr__(self):
         return f"<Recommendation(id={self.id}, commodity_id={self.commodity_id}, type={self.recommendation_type})>"
+
+
+class SeasonalPricePattern(Base):
+    """Seasonal price patterns for commodities - used for selling strategy."""
+
+    __tablename__ = "seasonal_price_patterns"
+
+    id = Column(Integer, primary_key=True, index=True)
+    commodity_id = Column(Integer, ForeignKey("commodities.id"), nullable=False)
+    month = Column(Integer, nullable=False)  # 1-12
+    avg_price = Column(Float, nullable=True)
+    std_dev = Column(Float, nullable=True)
+    min_price = Column(Float, nullable=True)
+    max_price = Column(Float, nullable=True)
+    peak_month = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    commodity = relationship("Commodity")
+
+    __table_args__ = (
+        UniqueConstraint("commodity_id", "month", name="uq_commodity_month"),
+        Index("idx_seasonal_patterns_commodity", "commodity_id"),
+        Index("idx_seasonal_patterns_month", "month"),
+    )
+
+    def __repr__(self):
+        return f"<SeasonalPricePattern(commodity_id={self.commodity_id}, month={self.month})>"
+
+
+class StorageCost(Base):
+    """Storage costs for different commodities - used for selling strategy."""
+
+    __tablename__ = "storage_costs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    commodity_id = Column(Integer, ForeignKey("commodities.id"), nullable=False)
+    cost_per_quintal_per_month = Column(Float, nullable=False)
+    max_storage_days = Column(Integer, nullable=False)
+    perishable = Column(Boolean, default=False)
+    notes = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    commodity = relationship("Commodity")
+
+    __table_args__ = (
+        UniqueConstraint("commodity_id", name="uq_commodity_storage"),
+        Index("idx_storage_costs_commodity", "commodity_id"),
+    )
+
+    def __repr__(self):
+        return f"<StorageCost(commodity_id={self.commodity_id}, cost={self.cost_per_quintal_per_month})>"
+
+
+class PriceVolatility(Base):
+    """Price volatility metrics for commodities - used for selling strategy."""
+
+    __tablename__ = "price_volatility"
+
+    id = Column(Integer, primary_key=True, index=True)
+    commodity_id = Column(Integer, ForeignKey("commodities.id"), nullable=False)
+    period = Column(String(20), nullable=False)  # '30_day', '90_day', '180_day'
+    volatility_score = Column(Float, nullable=False)  # 0-1
+    calculated_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationships
+    commodity = relationship("Commodity")
+
+    __table_args__ = (
+        Index("idx_price_volatility_commodity", "commodity_id"),
+        Index("idx_price_volatility_period", "period"),
+    )
+
+    def __repr__(self):
+        return f"<PriceVolatility(commodity_id={self.commodity_id}, period={self.period}, score={self.volatility_score})>"

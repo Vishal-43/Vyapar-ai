@@ -37,6 +37,7 @@ async def init_async_db() -> None:
         settings.database_url,
         echo=settings.db_echo,
         pool_pre_ping=True,
+        connect_args={"timeout": 30},
     )
     
     async_session_factory = async_sessionmaker(
@@ -46,6 +47,10 @@ async def init_async_db() -> None:
     )
     
     async with async_engine.begin() as conn:
+        if "sqlite" in settings.database_url:
+            await conn.run_sync(lambda c: c.execute("PRAGMA journal_mode=WAL;"))
+            await conn.run_sync(lambda c: c.execute("PRAGMA synchronous=NORMAL;"))
+            await conn.run_sync(lambda c: c.execute("PRAGMA busy_timeout=30000;"))
         await conn.run_sync(Base.metadata.create_all)
     
     logger.info("Async database initialized successfully")
@@ -61,7 +66,7 @@ def init_sync_db() -> None:
         sync_engine = create_engine(
             db_url,
             echo=settings.db_echo,
-            connect_args={"check_same_thread": False},
+            connect_args={"check_same_thread": False, "timeout": 30},
             poolclass=NullPool,
         )
     else:
@@ -78,6 +83,12 @@ def init_sync_db() -> None:
         expire_on_commit=False,
     )
     
+    if "sqlite" in db_url:
+        from sqlalchemy import text
+        with sync_engine.connect() as conn:
+            conn.execute(text("PRAGMA journal_mode=WAL;"))
+            conn.execute(text("PRAGMA synchronous=NORMAL;"))
+            conn.execute(text("PRAGMA busy_timeout=30000;"))
     Base.metadata.create_all(bind=sync_engine)
     
     logger.info("Sync database initialized successfully")

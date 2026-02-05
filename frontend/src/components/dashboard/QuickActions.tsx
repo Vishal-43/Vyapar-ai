@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { FiBarChart2, FiBox, FiTrendingUp, FiZap, FiStar, FiTruck, FiTarget, FiActivity } from "react-icons/fi";
+import { FiBarChart2, FiBox, FiTrendingUp, FiZap, FiStar, FiTruck, FiTarget, FiActivity, FiDollarSign } from "react-icons/fi";
 
 interface QuickAction {
   icon: React.ReactNode;
@@ -37,6 +37,13 @@ const actions: QuickAction[] = [
     description: "Buy/sell suggestions",
     path: "/dashboard/recommendations",
     color: "bg-amber-500",
+  },
+  {
+    icon: <FiDollarSign className="w-6 h-6" />,
+    label: "Selling Strategy",
+    description: "Best time-to-sell advice",
+    path: "/dashboard/selling-strategy",
+    color: "bg-emerald-600",
   },
   {
     icon: <FiStar className="w-6 h-6" />,

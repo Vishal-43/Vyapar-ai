@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 from fastapi import APIRouter, Depends, HTTPException, Query, status, Request
 from loguru import logger
+from sqlalchemy import select, desc
 
 from app.config import settings
 
@@ -26,6 +27,7 @@ from app.database.repositories import (
     InventoryRepository,
     PredictionMetricsRepository,
 )
+from app.database.models import MarketPrice
 from app.ml.predictor import AgriculturalPredictor
 from app.models.schemas import (
     ForecastRequest,
@@ -809,6 +811,33 @@ async def get_price_history(
             market_id=market_obj.id,
             days=days,
         )
+
+        notice = None
+
+        if not history:
+            latest_market_query = (
+                select(MarketPrice.market_id)
+                .where(MarketPrice.commodity_id == commodity_obj.id)
+                .order_by(desc(MarketPrice.date))
+                .limit(1)
+            )
+            latest_result = await market_price_repo.db.execute(latest_market_query)
+            fallback_market_id = latest_result.scalar_one_or_none()
+
+            if fallback_market_id and fallback_market_id != market_obj.id:
+                fallback_history = await market_price_repo.get_price_history(
+                    commodity_id=commodity_obj.id,
+                    market_id=fallback_market_id,
+                    days=days,
+                )
+
+                if fallback_history:
+                    fallback_market = await market_repo.get_by_id(fallback_market_id)
+                    history = fallback_history
+                    market_obj = fallback_market or market_obj
+                    notice = (
+                        "No data for selected market. Showing latest available market data instead."
+                    )
         
         return {
             "commodity": commodity_obj.name,
@@ -825,6 +854,7 @@ async def get_price_history(
                 for p in history
             ],
             "count": len(history),
+            "notice": notice,
         }
     except HTTPException:
         raise
@@ -995,3 +1025,55 @@ async def get_data_status(
     except Exception as exc:
         logger.exception(f"Data status check failed: {exc}")
         raise HTTPException(status_code=500, detail="Unable to check data status")
+
+
+@router.post("/selling-strategies/get-strategy")
+async def get_selling_strategy(
+    request: "SellingStrategyInput",
+    commodity_repo: CommodityRepository = Depends(get_commodity_repo),
+) -> "SellingRecommendation":
+    """
+    Get selling strategy recommendation for farmers
+    
+    This endpoint analyzes market conditions, seasonal patterns, storage costs,
+    and price trends to recommend the optimal time to sell crops.
+    """
+    try:
+        from fastapi.concurrency import run_in_threadpool
+        from app.engines.selling_strategy import SellingStrategyEngine, SellingStrategyInput, SellingRecommendation
+        from app.database.connection import get_sync_session
+        
+        # Validate commodity exists
+        commodity = await commodity_repo.get_by_id(request.commodity_id)
+        if not commodity:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Commodity with ID {request.commodity_id} not found"
+            )
+        
+        def _run_strategy():
+            session_gen = get_sync_session()
+            session = next(session_gen)
+            try:
+                engine = SellingStrategyEngine(session)
+                return engine.get_selling_strategy(request)
+            finally:
+                session_gen.close()
+
+        recommendation = await run_in_threadpool(_run_strategy)
+        
+        logger.info(
+            f"Selling strategy generated for {request.commodity_name}: "
+            f"{recommendation.strategy.value} (confidence: {recommendation.confidence_score:.2f})"
+        )
+        
+        return recommendation
+    
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.exception(f"Failed to generate selling strategy: {exc}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Unable to generate selling strategy: {str(exc)}"
+        )
