@@ -3,7 +3,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, AliasChoices
 
 class AlertType(str, Enum):
 
@@ -251,9 +251,9 @@ class DemandGraphPoint(BaseSchema):
 
 class ImpactItem(BaseSchema):
 
-    title: str
+    title: str = Field(validation_alias=AliasChoices("title", "event", "condition"))
     subtitle: Optional[str] = None
-    delta: Optional[str] = None
+    delta: Optional[str] = Field(default=None, validation_alias=AliasChoices("delta", "impact"))
     positive: Optional[bool] = None
 
 class ImpactData(BaseSchema):
