@@ -1,3 +1,13 @@
 requests
-flask
-
+fastapi
+uvicorn
+pydantic
+pandas
+scikit-learn
+joblib
+loguru
+pydantic
+pydantic_settings
+sqlalchemy
+alembic
+databases
