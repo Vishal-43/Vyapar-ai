@@ -66,7 +66,7 @@ function App() {
           element={
             <>
               <SignedIn>
-                <ComingSoon />
+                <Inventory />
               </SignedIn>
               <SignedOut>
                 <Navigate to="/auth" replace />
@@ -79,7 +79,7 @@ function App() {
           element={
             <>
               <SignedIn>
-                <ComingSoon />
+                <Insights />
               </SignedIn>
               <SignedOut>
                 <Navigate to="/auth" replace />
@@ -105,7 +105,7 @@ function App() {
           element={
             <>
               <SignedIn>
-                <ComingSoon />
+                <BuySellAlerts />
               </SignedIn>
               <SignedOut>
                 <Navigate to="/auth" replace />
@@ -119,7 +119,7 @@ function App() {
             <>
               <SignedIn>
                 <RecommendationProvider>
-                  <ComingSoon />
+                  <Recommendations />
                 </RecommendationProvider>
               </SignedIn>
               <SignedOut>
@@ -133,7 +133,7 @@ function App() {
           element={
             <>
               <SignedIn>
-                <ComingSoon />
+                <Community />
               </SignedIn>
               <SignedOut>
                 <Navigate to="/auth" replace />
@@ -146,7 +146,7 @@ function App() {
           element={
             <>
               <SignedIn>
-                <ComingSoon />
+                <Watchlist />
               </SignedIn>
               <SignedOut>
                 <Navigate to="/auth" replace />
@@ -159,7 +159,7 @@ function App() {
           element={
             <>
               <SignedIn>
-                <ComingSoon />
+                <SupplyChain />
               </SignedIn>
               <SignedOut>
                 <Navigate to="/auth" replace />
@@ -172,7 +172,7 @@ function App() {
           element={
             <>
               <SignedIn>
-                <ComingSoon />
+                <Community />
               </SignedIn>
               <SignedOut>
                 <Navigate to="/auth" replace />

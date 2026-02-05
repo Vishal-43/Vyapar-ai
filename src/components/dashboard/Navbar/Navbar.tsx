@@ -203,6 +203,15 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
             />
 
             <SideItem
+              icon={<FiTruck />}
+              label="Supply Chain"
+              active={isActive("/dashboard/supply-chain")}
+              onClick={() => {
+                navigate("/dashboard/supply-chain");
+                setOpen(false);
+              }}
+            />
+            <SideItem
               icon={<FiUsers />}
               label="Community"
               active={isActive("/dashboard/community")}
