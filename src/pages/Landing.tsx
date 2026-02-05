@@ -1,4 +1,4 @@
-import Footer from "../components/Footer";
+import Footer from "../components/dashboard/Footer";
 import AboutOurApps from "../components/landing/AboutApp";
 import ArchitectureSection from "../components/landing/Architecture";
 import HeroSection from "../components/landing/HeroSection";

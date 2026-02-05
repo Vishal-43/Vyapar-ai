@@ -24,7 +24,7 @@ const dummyNotifications = [
   },
 ];
 
-export default function NotifyComponent({
+export default function NotifyDummy({
   children,
 }: {
   children: React.ReactNode;

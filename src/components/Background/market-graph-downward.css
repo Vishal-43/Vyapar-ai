@@ -1,0 +1,64 @@
+/* =========================
+   UPWARD MARKET GRAPH
+   ========================= */
+
+.market-graph-upward {
+  position: absolute;
+  inset: 12% 0 auto 0; /* anchor from top */
+  height: 45%;
+  width: 100%;
+  z-index: 1;
+  pointer-events: none;
+
+  /* 🔑 THIS IS THE KEY */
+  transform: scaleY(-1);
+  transform-origin: center;
+}
+
+/* =========================
+   REUSE EXISTING LINE STYLES
+   ========================= */
+
+.market-graph-upward .market-line {
+  fill: none;
+  stroke-linecap: round;
+  stroke-dasharray: 1200;
+  stroke-dashoffset: 1200;
+  animation: draw-line 3.5s ease-out forwards;
+}
+
+.market-graph-upward .line-strong {
+  stroke: rgba(16, 185, 129, 0.95);
+  stroke-width: 3;
+  filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.35));
+  animation:
+    draw-line 3.2s ease-out forwards,
+    float-line 10s ease-in-out infinite;
+}
+
+.market-graph-upward .line-medium {
+  stroke: rgba(5, 150, 105, 0.75);
+  stroke-width: 2.8;
+  animation:
+    draw-line 3.6s ease-out forwards,
+    float-line 14s ease-in-out infinite;
+}
+
+.market-graph-upward .line-soft {
+  stroke: rgba(107, 114, 128, 0.6);
+  stroke-width: 2.4;
+  animation:
+    draw-line 4s ease-out forwards,
+    float-line 18s ease-in-out infinite;
+}
+
+.market-graph-upward .line-faint {
+  stroke: rgba(16, 185, 129, 0.35);
+  stroke-width: 2;
+  animation:
+    draw-line 4.6s ease-out forwards,
+    float-line 22s ease-in-out infinite;
+}
+
+.market-graph-upward .delay-1 { animation-delay: 0.8s; }
+.market-graph-upward .delay-2 { animation-delay: 1.4s; }

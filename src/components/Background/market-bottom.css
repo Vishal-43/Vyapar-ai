@@ -1,0 +1,99 @@
+/* =========================
+   VERTICAL MARKET GRAPH (BOTTOM → TOP)
+   ========================= */
+
+.market-graph-bottom {
+  position: absolute;
+  inset: auto auto 0 50%;
+  width: 45%;
+  height: 100%;
+  transform: translateX(-50%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* =========================
+   BASE LINE STYLE
+   ========================= */
+
+.market-line-bottom {
+  fill: none;
+  stroke-linecap: round;
+  stroke-dasharray: 1400;
+  stroke-dashoffset: 1400;
+  animation: draw-line-bottom 4s ease-out forwards;
+}
+
+/* =========================
+   LINE VARIANTS
+   ========================= */
+
+.line-strong-bottom {
+  stroke: rgba(16, 185, 129, 0.85);
+  stroke-width: 3;
+  filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.35));
+  animation:
+    draw-line-bottom 3.4s ease-out forwards,
+    float-vertical-bottom 14s ease-in-out infinite;
+}
+
+.line-medium-bottom {
+  stroke: rgba(5, 150, 105, 0.65);
+  stroke-width: 2.6;
+  animation:
+    draw-line-bottom 3.8s ease-out forwards,
+    float-vertical-bottom 18s ease-in-out infinite;
+}
+
+.line-soft-bottom {
+  stroke: rgba(107, 114, 128, 0.55);
+  stroke-width: 2.2;
+  animation:
+    draw-line-bottom 4.2s ease-out forwards,
+    float-vertical-bottom 22s ease-in-out infinite;
+}
+
+.line-faint-bottom {
+  stroke: rgba(16, 185, 129, 0.35);
+  stroke-width: 2;
+  animation:
+    draw-line-bottom 4.8s ease-out forwards,
+    float-vertical-bottom 26s ease-in-out infinite;
+}
+
+.delay-1 { animation-delay: 0.9s; }
+.delay-2 { animation-delay: 1.6s; }
+
+/* =========================
+   ANIMATIONS
+   ========================= */
+
+@keyframes draw-line-bottom {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes float-vertical-bottom {
+  0%   { transform: translateY(0); }
+  50%  { transform: translateY(10px); }
+  100% { transform: translateY(0); }
+}
+
+/* =========================
+   RESPONSIVE TUNING
+   ========================= */
+
+@media (max-width: 768px) {
+  .market-graph-bottom {
+    width: 70%;
+    opacity: 0.25;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .market-line-bottom {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
