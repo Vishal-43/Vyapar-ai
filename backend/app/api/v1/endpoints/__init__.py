@@ -1,4 +1,3 @@
-
 from app.api.v1.endpoints import (
     health,
     predictions,
@@ -13,6 +12,7 @@ from app.api.v1.endpoints import (
     discussions,
     watchlist,
     market_trends,
+    direct_buyer_engine,
 )
 
 __all__ = [
@@ -29,4 +29,5 @@ __all__ = [
     "discussions",
     "watchlist",
     "market_trends",
+    "direct_buyer_engine",
 ]

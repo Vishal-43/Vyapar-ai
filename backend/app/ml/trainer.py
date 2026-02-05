@@ -63,7 +63,20 @@ class ModelTrainer:
             'colsample_bytree': [0.8, 1.0],
         }
 
-        tscv = TimeSeriesSplit(n_splits=cv_splits)
+        n_splits = min(3, len(X_train) - 1) if len(X_train) > 1 else 1
+        if n_splits < 2:
+            logger.warning("Too few samples for cross-validation. Fitting XGBoost directly.")
+            xgb_model.fit(X_train, y_train)
+            self.models['xgboost'] = xgb_model
+            return xgb_model
+        tscv = TimeSeriesSplit(n_splits=n_splits)
+        sample_size = min(20000, len(X_train))
+        if len(X_train) > sample_size:
+            idx = np.random.choice(len(X_train), sample_size, replace=False)
+            X_sample, y_sample = X_train[idx], y_train[idx]
+            logger.info(f"Using {sample_size} samples for XGBoost grid search")
+        else:
+            X_sample, y_sample = X_train, y_train
         grid_search = GridSearchCV(
             xgb_model,
             param_grid,
@@ -72,14 +85,14 @@ class ModelTrainer:
             n_jobs=-1,
             verbose=1,
         )
-
-        grid_search.fit(X_train, y_train)
-        logger.info(
-            f"XGBoost trained successfully with accuracy {grid_search.best_score_:.2%}"
-        )
-
-        self.models['xgboost'] = grid_search.best_estimator_
-        return grid_search.best_estimator_
+        grid_search.fit(X_sample, y_sample)
+        logger.info(f"XGBoost grid search best score: {grid_search.best_score_:.2%}")
+        best_xgb = grid_search.best_estimator_
+        if len(X_train) > sample_size:
+            logger.info("Retraining XGBoost best estimator on full data")
+            best_xgb.fit(X_train, y_train)
+        self.models['xgboost'] = best_xgb
+        return best_xgb
 
     def train_lightgbm(
         self, X_train: np.ndarray, y_train: np.ndarray, cv_splits: int = 5
@@ -111,7 +124,20 @@ class ModelTrainer:
             'min_child_samples': [5, 10, 20],
         }
 
-        tscv = TimeSeriesSplit(n_splits=cv_splits)
+        n_splits = min(3, len(X_train) - 1) if len(X_train) > 1 else 1
+        if n_splits < 2:
+            logger.warning("Too few samples for cross-validation. Fitting LightGBM directly.")
+            lgb_model.fit(X_train, y_train)
+            self.models['lightgbm'] = lgb_model
+            return lgb_model
+        tscv = TimeSeriesSplit(n_splits=n_splits)
+        sample_size = min(20000, len(X_train))
+        if len(X_train) > sample_size:
+            idx = np.random.choice(len(X_train), sample_size, replace=False)
+            X_sample, y_sample = X_train[idx], y_train[idx]
+            logger.info(f"Using {sample_size} samples for LightGBM grid search")
+        else:
+            X_sample, y_sample = X_train, y_train
         grid_search = GridSearchCV(
             lgb_model,
             param_grid,
@@ -120,14 +146,14 @@ class ModelTrainer:
             n_jobs=-1,
             verbose=1,
         )
-
-        grid_search.fit(X_train, y_train)
-        logger.info(
-            f"LightGBM model ready with {grid_search.best_score_:.2%} validation accuracy"
-        )
-
-        self.models['lightgbm'] = grid_search.best_estimator_
-        return grid_search.best_estimator_
+        grid_search.fit(X_sample, y_sample)
+        logger.info(f"LightGBM grid search best score: {grid_search.best_score_:.2%}")
+        best_lgb = grid_search.best_estimator_
+        if len(X_train) > sample_size:
+            logger.info("Retraining LightGBM best estimator on full data")
+            best_lgb.fit(X_train, y_train)
+        self.models['lightgbm'] = best_lgb
+        return best_lgb
 
     def train_catboost(
         self, X_train: np.ndarray, y_train: np.ndarray, cv_splits: int = 5
@@ -155,7 +181,20 @@ class ModelTrainer:
             'iterations': [300, 600],
         }
 
-        tscv = TimeSeriesSplit(n_splits=cv_splits)
+        n_splits = min(3, len(X_train) - 1) if len(X_train) > 1 else 1
+        if n_splits < 2:
+            logger.warning("Too few samples for cross-validation. Fitting CatBoost directly.")
+            catboost_model.fit(X_train, y_train)
+            self.models['catboost'] = catboost_model
+            return catboost_model
+        tscv = TimeSeriesSplit(n_splits=n_splits)
+        sample_size = min(20000, len(X_train))
+        if len(X_train) > sample_size:
+            idx = np.random.choice(len(X_train), sample_size, replace=False)
+            X_sample, y_sample = X_train[idx], y_train[idx]
+            logger.info(f"Using {sample_size} samples for CatBoost grid search")
+        else:
+            X_sample, y_sample = X_train, y_train
         grid_search = GridSearchCV(
             catboost_model,
             param_grid,
@@ -164,14 +203,14 @@ class ModelTrainer:
             n_jobs=-1,
             verbose=1,
         )
-
-        grid_search.fit(X_train, y_train)
-        logger.info(
-            f"CatBoost model achieved {grid_search.best_score_:.2%} accuracy on validation"
-        )
-
-        self.models['catboost'] = grid_search.best_estimator_
-        return grid_search.best_estimator_
+        grid_search.fit(X_sample, y_sample)
+        logger.info(f"CatBoost grid search best score: {grid_search.best_score_:.2%}")
+        best_cat = grid_search.best_estimator_
+        if len(X_train) > sample_size:
+            logger.info("Retraining CatBoost best estimator on full data")
+            best_cat.fit(X_train, y_train)
+        self.models['catboost'] = best_cat
+        return best_cat
 
     def train_random_forest(
         self, X_train: np.ndarray, y_train: np.ndarray, cv_splits: int = 5
@@ -195,7 +234,20 @@ class ModelTrainer:
             'min_samples_leaf': [1, 2],
         }
 
-        tscv = TimeSeriesSplit(n_splits=cv_splits)
+        n_splits = min(3, len(X_train) - 1) if len(X_train) > 1 else 1
+        if n_splits < 2:
+            logger.warning("Too few samples for cross-validation. Fitting Random Forest directly.")
+            rf_model.fit(X_train, y_train)
+            self.models['random_forest'] = rf_model
+            return rf_model
+        tscv = TimeSeriesSplit(n_splits=n_splits)
+        sample_size = min(20000, len(X_train))
+        if len(X_train) > sample_size:
+            idx = np.random.choice(len(X_train), sample_size, replace=False)
+            X_sample, y_sample = X_train[idx], y_train[idx]
+            logger.info(f"Using {sample_size} samples for RF grid search")
+        else:
+            X_sample, y_sample = X_train, y_train
         grid_search = GridSearchCV(
             rf_model,
             param_grid,
@@ -204,14 +256,14 @@ class ModelTrainer:
             n_jobs=-1,
             verbose=1,
         )
-
-        grid_search.fit(X_train, y_train)
-        logger.info(
-            f"Random Forest model trained with {grid_search.best_score_:.2%} prediction accuracy"
-        )
-
-        self.models['random_forest'] = grid_search.best_estimator_
-        return grid_search.best_estimator_
+        grid_search.fit(X_sample, y_sample)
+        logger.info(f"Random Forest grid search best score: {grid_search.best_score_:.2%}")
+        best_rf = grid_search.best_estimator_
+        if len(X_train) > sample_size:
+            logger.info("Retraining RF best estimator on full data")
+            best_rf.fit(X_train, y_train)
+        self.models['random_forest'] = best_rf
+        return best_rf
 
     def train_svm(
         self, X_train: np.ndarray, y_train: np.ndarray, cv_splits: int = 3
@@ -242,7 +294,13 @@ class ModelTrainer:
             'gamma': ['scale', 'auto'],
         }
 
-        tscv = TimeSeriesSplit(n_splits=cv_splits)
+        n_splits = min(3, len(X_sample) - 1) if len(X_sample) > 1 else 1
+        if n_splits < 2:
+            logger.warning("Too few samples for cross-validation. Fitting SVM directly.")
+            svm_model.fit(X_sample, y_sample)
+            self.models['svm'] = svm_model
+            return svm_model
+        tscv = TimeSeriesSplit(n_splits=n_splits)
         grid_search = GridSearchCV(
             svm_model,
             param_grid,
@@ -251,19 +309,12 @@ class ModelTrainer:
             n_jobs=-1,
             verbose=1,
         )
-
         grid_search.fit(X_sample, y_sample)
-        
-        # Train final model on full dataset with best parameters
         best_svm = grid_search.best_estimator_
         if len(X_train) > sample_size:
             logger.info("Training final SVM model on complete dataset")
             best_svm.fit(X_train, y_train)
-        
-        logger.info(
-            f"SVM model trained with {grid_search.best_score_:.2%} validation accuracy"
-        )
-
+        logger.info(f"SVM model trained with {grid_search.best_score_:.2%} validation accuracy")
         self.models['svm'] = best_svm
         return best_svm
 
@@ -281,6 +332,19 @@ class ModelTrainer:
             logger.info(f"Using {sample_size} samples for GPR training (computational efficiency)")
         else:
             X_sample, y_sample = X_train, y_train
+
+        if len(X_sample) < 2:
+            logger.warning("Too few samples for GPR kernel search. Fitting GPR with default kernel.")
+            kernel = C(1.0) * RBF(1.0) + WhiteKernel(noise_level=1.0)
+            best_gpr = GaussianProcessRegressor(
+                kernel=kernel,
+                alpha=1e-6,
+                normalize_y=True,
+                random_state=42,
+            )
+            best_gpr.fit(X_sample, y_sample)
+            self.models['gpr'] = best_gpr
+            return best_gpr
 
         # Define kernel combinations for price modeling
         kernels = [
@@ -426,8 +490,11 @@ class ModelTrainer:
                 logger.warning(f"Unknown model: {model_name}")
                 continue
 
+            if model is None:
+                logger.warning(f"Skipping evaluation for {model_name} as model is None.")
+                continue
+
             metrics = self.evaluate_model(model, X_test, y_test, model_name)
-            
             importance = self.get_feature_importance(model, model_name)
 
             results[model_name] = {

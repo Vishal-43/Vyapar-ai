@@ -1,4 +1,3 @@
-
 from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
@@ -16,6 +15,11 @@ from app.api.v1.endpoints import (
     discussions,
     watchlist,
     market_trends,
+    cost_breakeven,
+    selling_strategy,
+    weather_risk,
+    crop_mix_optimizer,
+    direct_buyer_engine,
 )
 
 api_router = APIRouter()
@@ -34,3 +38,8 @@ api_router.include_router(recommendations.router, tags=["Recommendations"])
 api_router.include_router(discussions.router, tags=["Discussions"])
 api_router.include_router(watchlist.router, tags=["Watchlist"])
 api_router.include_router(market_trends.router, tags=["Market Trends"])
+api_router.include_router(cost_breakeven.router, prefix="/cost-analysis", tags=["Cost Breakeven"])
+api_router.include_router(selling_strategy.router, prefix="/selling-strategies", tags=["Selling Strategy"])
+api_router.include_router(weather_risk.router, prefix="/weather-risk", tags=["Weather Risk"])
+api_router.include_router(crop_mix_optimizer.router, prefix="/crop-mix", tags=["Crop Mix Optimizer"])
+api_router.include_router(direct_buyer_engine.router, prefix="/direct-buyer", tags=["Direct Buyer Engine"])

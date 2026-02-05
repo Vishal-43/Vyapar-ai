@@ -63,15 +63,23 @@ def load_training_data(
             # Fallback: load from data/raw JSON
             logger.warning("No training data in DB, loading from raw data folder...")
             data_dir = Path(__file__).parent.parent / 'data' / 'raw'
-            price_files = list(data_dir.glob("market_prices_*.json"))
-            if not price_files:
-                logger.error(f"No data files found in {data_dir}")
-                return None, None, None, None
-            latest_file = max(price_files, key=lambda p: p.stat().st_mtime)
-            logger.info(f"Loading data from {latest_file}")
-            import json
-            with open(latest_file, 'r') as f:
-                data = json.load(f)
+            # Use truncated file for fast training if available
+            truncated_file = data_dir / "market_prices_truncated.json"
+            if truncated_file.exists():
+                logger.info(f"Loading data from {truncated_file} (truncated for fast training)")
+                import json
+                with open(truncated_file, 'r') as f:
+                    data = json.load(f)
+            else:
+                price_files = list(data_dir.glob("market_prices_*.json"))
+                if not price_files:
+                    logger.error(f"No data files found in {data_dir}")
+                    return None, None, None, None
+                latest_file = max(price_files, key=lambda p: p.stat().st_mtime)
+                logger.info(f"Loading data from {latest_file}")
+                import json
+                with open(latest_file, 'r') as f:
+                    data = json.load(f)
             if isinstance(data, list):
                 prices = data
             else:
@@ -125,7 +133,25 @@ def train_models(
         logger.error("Failed to load training data")
         return None
 
+
     logger.info(f"Training data shape: {X.shape}")
+
+    # --- Data Diagnostics ---
+    df_X = pd.DataFrame(X, columns=preprocessor.feature_names if hasattr(preprocessor, 'feature_names') else None)
+    logger.info("Data diagnostics before training:")
+    for col in df_X.columns:
+        nunique = pd.Series(df_X[col]).nunique(dropna=False)
+        n_missing = pd.Series(df_X[col]).isna().sum()
+        logger.info(f"Feature '{col}': unique={nunique}, missing={n_missing}")
+        if nunique == 1:
+            logger.warning(f"Feature '{col}' is constant (only one unique value). This may cause model warnings.")
+    y_unique = pd.Series(y).nunique(dropna=False)
+    y_missing = pd.Series(y).isna().sum()
+    logger.info(f"Target: unique={y_unique}, missing={y_missing}")
+    if y_unique == 1:
+        logger.warning("Target variable is constant (only one unique value). Model training will not work.")
+    if y_missing > 0:
+        logger.warning(f"Target variable has {y_missing} missing values.")
 
     split_idx = int(len(X) * (1 - test_size))
     X_train, X_test = X[:split_idx], X[split_idx:]

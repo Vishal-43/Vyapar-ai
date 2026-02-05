@@ -182,6 +182,42 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
                 setOpen(false);
               }}
             />
+              <SideItem
+                icon={<FiActivity />}
+                label="Selling Strategy"
+                active={isActive("/dashboard/selling-strategy")}
+                onClick={() => {
+                  navigate("/dashboard/selling-strategy");
+                  setOpen(false);
+                }}
+              />
+              <SideItem
+                icon={<FiActivity />}
+                label="Weather Risk"
+                active={isActive("/dashboard/weather-risk")}
+                onClick={() => {
+                  navigate("/dashboard/weather-risk");
+                  setOpen(false);
+                }}
+              />
+              <SideItem
+                icon={<FiActivity />}
+                label="Crop Mix Optimizer"
+                active={isActive("/dashboard/crop-mix-optimizer")}
+                onClick={() => {
+                  navigate("/dashboard/crop-mix-optimizer");
+                  setOpen(false);
+                }}
+              />
+              <SideItem
+                icon={<FiActivity />}
+                label="Direct Buyer Engine"
+                active={isActive("/dashboard/direct-buyer-engine")}
+                onClick={() => {
+                  navigate("/dashboard/direct-buyer-engine");
+                  setOpen(false);
+                }}
+              />
             <SideItem
               icon={<FiBox />}
               label="Inventory"

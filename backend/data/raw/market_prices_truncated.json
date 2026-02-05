@@ -1,0 +1,52 @@
+[
+  {
+    "date": "2026-02-01",
+    "commodity_id": 1,
+    "market_id": 1,
+    "price": 2500,
+    "min_price": 2400,
+    "max_price": 2600,
+    "modal_price": 2500,
+    "arrival": 100
+  },
+  {
+    "date": "2026-02-01",
+    "commodity_id": 2,
+    "market_id": 1,
+    "price": 3500,
+    "min_price": 3400,
+    "max_price": 3600,
+    "modal_price": 3500,
+    "arrival": 120
+  },
+  {
+    "date": "2026-02-01",
+    "commodity_id": 1,
+    "market_id": 2,
+    "price": 2550,
+    "min_price": 2500,
+    "max_price": 2600,
+    "modal_price": 2550,
+    "arrival": 90
+  },
+  {
+    "date": "2026-02-02",
+    "commodity_id": 1,
+    "market_id": 1,
+    "price": 2520,
+    "min_price": 2450,
+    "max_price": 2600,
+    "modal_price": 2520,
+    "arrival": 110
+  },
+  {
+    "date": "2026-02-02",
+    "commodity_id": 2,
+    "market_id": 1,
+    "price": 3550,
+    "min_price": 3500,
+    "max_price": 3600,
+    "modal_price": 3550,
+    "arrival": 130
+  }
+]
