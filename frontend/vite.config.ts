@@ -134,11 +134,11 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'https://l6dtnrdl-8000.inc1.devtunnels.ms',
         changeOrigin: true,
       },
       '/users': {
-        target: 'http://localhost:8000',
+        target: 'https://l6dtnrdl-8000.inc1.devtunnels.ms',
         changeOrigin: true,
       },
     },
