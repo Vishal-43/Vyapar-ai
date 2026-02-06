@@ -11,13 +11,11 @@ import MarketComparison from "../components/ProductAnalysis/MarketComparison";
 import ProfitCalculator from "../components/ProductAnalysis/ProfitCalculator";
 import PriceAlerts from "../components/ProductAnalysis/PriceAlerts";
 import ExportData from "../components/ProductAnalysis/ExportData";
-import GraphBackgroundCorner from "../components/Background/GraphBackgroundCorner";
 
 const ProductAnalysis = () => {
   return (
     <ContextAnalysisProvider>
       <Navbar />
-      <GraphBackgroundCorner/>
       <main
         className="mx-auto px-4 pt-20 pb-12 space-y-8 max-w-6xl">
           <header>
