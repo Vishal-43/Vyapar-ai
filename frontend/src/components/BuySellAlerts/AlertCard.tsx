@@ -52,22 +52,22 @@ export default function AlertCard({ alert }: AlertCardProps) {
   const getSignalColor = (signal: string | null) => {
     switch (signal) {
       case "BUY":
-        return "bg-green-50 dark:bg-green-900 border-green-200 dark:border-green-700";
+        return "bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-800";
       case "SELL":
-        return "bg-red-50 dark:bg-red-900 border-red-200 dark:border-red-700";
+        return "bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800";
       default:
-        return "bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700";
+        return "glass-card";
     }
   };
 
   const getSignalBadgeColor = (signal: string | null) => {
     switch (signal) {
       case "BUY":
-        return "bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-100";
+        return "bg-green-100 dark:bg-green-500/20 text-green-800 dark:text-green-300";
       case "SELL":
-        return "bg-red-100 dark:bg-red-800 text-red-800 dark:text-red-100";
+        return "bg-red-100 dark:bg-red-500/20 text-red-800 dark:text-red-300";
       default:
-        return "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100";
+        return ""; // Use CSS variables for default
     }
   };
 
@@ -79,7 +79,7 @@ export default function AlertCard({ alert }: AlertCardProps) {
   };
 
   return (
-    <div className={`border rounded-lg p-4 ${getSignalColor(alert.signal)}`}>
+    <div className={`border rounded-xl p-5 shadow-sm transition-all hover:shadow-md ${getSignalColor(alert.signal)}`}>
       {}
       <div className="flex justify-between items-start mb-4">
         <div className="flex-1">
@@ -93,7 +93,14 @@ export default function AlertCard({ alert }: AlertCardProps) {
             className={`px-3 py-1 text-xs font-semibold whitespace-nowrap ml-2 ${getSignalBadgeColor(
               alert.signal
             )}`}
-            style={{ borderRadius: 0 }}
+            style={{ 
+              borderRadius: 0,
+              ...(alert.signal !== "BUY" && alert.signal !== "SELL" && { 
+                background: "var(--panel)", 
+                color: "var(--text-main)",
+                border: "1px solid var(--border)"
+              })
+            }}
           >
             {alert.signal} {alert.signal_strength && `(${alert.signal_strength})`}
           </span>
@@ -101,30 +108,30 @@ export default function AlertCard({ alert }: AlertCardProps) {
       </div>
 
       {}
-      <div className="space-y-2 mb-4 pb-4 border-b border-opacity-20 dark:border-opacity-20">
+      <div className="space-y-3 mb-4 pb-4 border-b" style={{ borderColor: "var(--border)" }}>
         {alert.current_price !== null && (
           <div className="flex justify-between items-center">
-            <span className="text-sm" style={{ color: "var(--text-soft)" }}>Current Price:</span>
+            <span className="text-sm opacity-80" style={{ color: "var(--text-soft)" }}>Current Price:</span>
             <span className="font-semibold" style={{ color: "var(--text-main)" }}>
               ₹{alert.current_price.toFixed(2)}
             </span>
           </div>
         )}
         <div className="flex justify-between items-center">
-          <span className="text-sm" style={{ color: "var(--text-soft)" }}>Buy Threshold:</span>
+          <span className="text-sm opacity-80" style={{ color: "var(--text-soft)" }}>Buy Threshold:</span>
           <span className="font-semibold text-green-600 dark:text-green-400">
             ₹{alert.buy_threshold.toFixed(2)}
           </span>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-sm" style={{ color: "var(--text-soft)" }}>Sell Threshold:</span>
+          <span className="text-sm opacity-80" style={{ color: "var(--text-soft)" }}>Sell Threshold:</span>
           <span className="font-semibold text-red-600 dark:text-red-400">
             ₹{alert.sell_threshold.toFixed(2)}
           </span>
         </div>
         {alert.current_price !== null && (
           <div className="flex justify-between items-center">
-            <span className="text-sm" style={{ color: "var(--text-soft)" }}>Status:</span>
+            <span className="text-sm opacity-80" style={{ color: "var(--text-soft)" }}>Status:</span>
             <span className="text-sm font-medium" style={{ color: "var(--text-main)" }}>
               {getPriceStatus(alert.current_price, alert.buy_threshold, alert.sell_threshold)}
             </span>
@@ -133,13 +140,13 @@ export default function AlertCard({ alert }: AlertCardProps) {
       </div>
 
       {}
-      <div className="space-y-2 mb-4">
+      <div className="space-y-3 mb-4">
         <div className="flex justify-between items-center text-sm">
-          <span style={{ color: "var(--text-soft)" }}>Priority:</span>
+          <span className="opacity-80" style={{ color: "var(--text-soft)" }}>Priority:</span>
           <span className="font-medium" style={{ color: "var(--text-main)" }}>{alert.priority}</span>
         </div>
         <div className="flex justify-between items-center text-sm">
-          <span style={{ color: "var(--text-soft)" }}>Status:</span>
+          <span className="opacity-80" style={{ color: "var(--text-soft)" }}>Status:</span>
           <span
             className={`font-medium ${
               alert.enabled

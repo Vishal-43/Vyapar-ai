@@ -126,7 +126,8 @@ export const UserSettingsProvider: React.FC<UserSettingsProviderProps> = ({ chil
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+  const API_BASE = `${BACKEND_URL}/api`;
 
   const getProfile = async (): Promise<UserProfile> => {
     setIsLoading(true);

@@ -37,7 +37,7 @@ export default function GraphComponent({
   return (
     <CardComponent title={title}>
       <div className="h-64 sm:h-72 min-h-[256px]">
-        <ResponsiveContainer width="100%" height="100%" minHeight={256}>
+        <ResponsiveContainer width="100%" height="100%" minHeight={256} minWidth={0}>
           <LineChart
             data={data}
             margin={{ top: 10, right: 20, left: 0, bottom: 0 }}

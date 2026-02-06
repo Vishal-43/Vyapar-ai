@@ -49,7 +49,7 @@ export default function Inventory() {
           {}
           <ForecastProvider>
             <InventoryProvider>
-              <YourStock />
+              <BulkImport />
             </InventoryProvider>
           </ForecastProvider>
         </main>

@@ -23,7 +23,7 @@ export const CropMixOptimizerResult: React.FC<{ result: CropMixResult }> = ({ re
     </div>
 
     {/* Optimized Mix */}
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+    <div className="glass-card rounded-xl shadow-lg p-6 border" style={{ borderColor: "var(--border)" }}>
       <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
         <TrendingUp className="w-5 h-5 text-green-500" />
         Optimized Crop Distribution
@@ -32,7 +32,8 @@ export const CropMixOptimizerResult: React.FC<{ result: CropMixResult }> = ({ re
         {result.optimized_mix.map((crop, idx) => (
           <div 
             key={idx} 
-            className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition"
+            className="border rounded-lg p-4 hover:bg-emerald-50/10 dark:hover:bg-emerald-900/10 transition"
+            style={{ borderColor: "var(--border)" }}
           >
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 flex-1">
@@ -40,8 +41,8 @@ export const CropMixOptimizerResult: React.FC<{ result: CropMixResult }> = ({ re
                   <Sprout className="w-5 h-5 text-green-600 dark:text-green-400" />
                 </div>
                 <div className="flex-1">
-                  <h4 className="font-semibold text-gray-900 dark:text-gray-100">{crop.name}</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <h4 className="font-semibold" style={{ color: "var(--text-main)" }}>{crop.name}</h4>
+                  <p className="text-sm" style={{ color: "var(--text-soft)" }}>
                     {crop.area} hectares allocated
                   </p>
                 </div>
@@ -50,17 +51,17 @@ export const CropMixOptimizerResult: React.FC<{ result: CropMixResult }> = ({ re
                 <p className="text-lg font-semibold text-green-600 dark:text-green-400">
                   ₹{crop.expected_profit.toLocaleString()}
                 </p>
-                <p className="text-xs text-gray-500">Expected Profit</p>
+                <p className="text-xs" style={{ color: "var(--text-soft)" }}>Expected Profit</p>
               </div>
             </div>
             
             {/* Progress bar for area allocation */}
             <div className="mt-3">
-              <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400 mb-1">
+              <div className="flex justify-between text-xs mb-1" style={{ color: "var(--text-soft)" }}>
                 <span>Area allocation</span>
                 <span>{((crop.area / result.optimized_mix.reduce((sum, c) => sum + c.area, 0)) * 100).toFixed(1)}%</span>
               </div>
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+              <div className="w-full rounded-full h-2" style={{ background: "var(--border)" }}>
                 <div 
                   className="bg-green-500 h-2 rounded-full transition-all duration-500"
                   style={{ width: `${(crop.area / result.optimized_mix.reduce((sum, c) => sum + c.area, 0)) * 100}%` }}

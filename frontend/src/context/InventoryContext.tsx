@@ -71,7 +71,7 @@ export function InventoryProvider({
 
   
   const updateItem = (id: number, current: number) => {
-    console.log("Update item:", id, current);
+    // console.log("Update item:", id, current);
   };
 
   
@@ -106,7 +106,7 @@ export function InventoryProvider({
       }
 
       const result = await res.json();
-      console.log("Stock updated successfully:", result);
+      // console.log("Stock updated successfully:", result);
     } catch (error) {
       console.error("Stock update error:", error);
       throw error;

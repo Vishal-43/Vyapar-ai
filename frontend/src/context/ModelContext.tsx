@@ -12,6 +12,7 @@ export interface ModelAccuracyMetrics {
   mapeTraditional: number;
   aiAccuracy: number;
   traditionalAccuracy: number;
+  graphData?: ModelGraphPoint[];
 }
 
 export interface ModelGraphPoint {
@@ -52,24 +53,30 @@ export function ModelProvider({
     const fetchModelData = async () => {
       try {
         setIsLoading(true);
-        console.log("Fetching model accuracy from:", `${BACKEND_URL}/api/model/accuracy`);
+        // console.log("Fetching model accuracy from:", `${BACKEND_URL}/api/model/accuracy`);
         const res = await fetch(`${BACKEND_URL}/api/model/accuracy`);
-        console.log("Response status:", res.status);
+        // console.log("Response status:", res.status);
         
         if (res.ok) {
           const data = await res.json();
-          console.log("Received data:", data);
+          // console.log("Received data:", data);
           setMetrics(data);
           
-          const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-          const graphPoints: ModelGraphPoint[] = days.map((day, idx) => ({
-            day,
-            actual: 400 + (idx * 20) + Math.random() * 50,
-            aiForecast: 420 + (idx * 18) + Math.random() * 40,
-            traditionalForecast: 450 + (idx * 15) + Math.random() * 60,
-          }));
-          console.log("Generated graph data:", graphPoints);
-          setGraphData(graphPoints);
+          if (data.graphData && data.graphData.length > 0) {
+            // console.log("Using real graph data from backend");
+            setGraphData(data.graphData);
+          } else {
+            // console.log("No graph data from backend, generating demo data");
+            const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+            const graphPoints: ModelGraphPoint[] = days.map((day, idx) => ({
+              day,
+              actual: 400 + (idx * 20) + Math.random() * 50,
+              aiForecast: 420 + (idx * 18) + Math.random() * 40,
+              traditionalForecast: 450 + (idx * 15) + Math.random() * 60,
+            }));
+            // console.log("Generated graph data:", graphPoints);
+            setGraphData(graphPoints);
+          }
         } else {
           console.error("Failed to fetch model accuracy:", res.status, res.statusText);
           const errorText = await res.text();

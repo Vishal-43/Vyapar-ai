@@ -136,11 +136,11 @@ export default function WatchlistCard() {
   };
 
   return (
-    <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 p-6 shadow-sm">
+    <div className="glass-card rounded-xl p-6 shadow-sm border" style={{ borderColor: "var(--border)" }}>
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <FiStar className="w-5 h-5 text-amber-500" />
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <h3 className="text-lg font-semibold" style={{ color: "var(--text-main)" }}>
             Watchlist
           </h3>
         </div>
@@ -148,7 +148,10 @@ export default function WatchlistCard() {
           <button
             onClick={fetchWatchlist}
             disabled={isLoading}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="p-2 rounded-lg transition-colors"
+            style={{ background: "transparent" }}
+            onMouseEnter={(e) => e.currentTarget.style.background = "var(--border)"}
+            onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
           >
             <FiRefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
           </button>
@@ -163,12 +166,13 @@ export default function WatchlistCard() {
       </div>
 
       {showAddForm && (
-        <div className="mb-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+        <div className="mb-4 p-4 rounded-lg border" style={{ background: "var(--panel)", borderColor: "var(--border)" }}>
           <div className="grid grid-cols-2 gap-3 mb-3">
             <select
               value={selectedCommodity}
               onChange={(e) => setSelectedCommodity(e.target.value)}
-              className="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm"
+              className="px-3 py-2 rounded-lg border text-sm"
+              style={{ borderColor: "var(--border)", background: "var(--panel)", color: "var(--text-main)" }}
             >
               <option value="">Select Commodity</option>
               {commodities.map((c) => (
@@ -180,7 +184,8 @@ export default function WatchlistCard() {
             <select
               value={selectedMarket}
               onChange={(e) => setSelectedMarket(e.target.value)}
-              className="px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm"
+              className="px-3 py-2 rounded-lg border text-sm"
+              style={{ borderColor: "var(--border)", background: "var(--panel)", color: "var(--text-main)" }}
             >
               <option value="">Select Market</option>
               {markets.map((m) => (
@@ -201,7 +206,7 @@ export default function WatchlistCard() {
       )}
 
       {watchlist.length === 0 ? (
-        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+        <div className="text-center py-8" style={{ color: "var(--text-soft)" }}>
           <FiStar className="w-8 h-8 mx-auto mb-2 opacity-50" />
           <p>No items in watchlist</p>
           <p className="text-sm mt-1">Add commodities to track prices</p>
@@ -211,18 +216,21 @@ export default function WatchlistCard() {
           {watchlist.map((item) => (
             <div
               key={item.id}
-              className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              className="flex items-center justify-between p-3 rounded-lg transition-colors"
+              style={{ background: "var(--panel)", border: "1px solid var(--border)" }}
+              onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
+              onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
             >
               <div className="flex-1">
-                <p className="font-medium text-gray-900 dark:text-white">
+                <p className="font-medium" style={{ color: "var(--text-main)" }}>
                   {item.commodity}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-xs" style={{ color: "var(--text-soft)" }}>
                   {item.market}
                 </p>
               </div>
               <div className="text-right mr-3">
-                <p className="font-semibold text-gray-900 dark:text-white">
+                <p className="font-semibold" style={{ color: "var(--text-main)" }}>
                   ₹{item.price.toFixed(2)}
                 </p>
                 <div
@@ -242,7 +250,10 @@ export default function WatchlistCard() {
               </div>
               <button
                 onClick={() => removeFromWatchlist(item.id)}
-                className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                className="p-1.5 rounded-lg transition-colors"
+                style={{ color: "var(--text-soft)" }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = "rgb(239 68 68)"; e.currentTarget.style.background = "rgba(239, 68, 68, 0.1)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = "var(--text-soft)"; e.currentTarget.style.background = "transparent"; }}
               >
                 <FiTrash2 className="w-4 h-4" />
               </button>

@@ -157,7 +157,7 @@ const DataImport: React.FC = () => {
       </div>
 
       {}
-      <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-8 sm:p-12 text-center hover:border-emerald-400 dark:hover:border-emerald-600 transition-colors bg-gray-50 dark:bg-gray-900/50">
+      <div className="border-2 border-dashed rounded-lg p-8 sm:p-12 text-center hover:border-emerald-400 transition-colors" style={{ borderColor: "var(--border)", background: "var(--panel)" }}>
         <div className="flex justify-center mb-4">
           <Upload className="w-10 h-10 sm:w-12 sm:h-12" style={{ color: "var(--text-soft)" }} />
         </div>
@@ -194,7 +194,7 @@ const DataImport: React.FC = () => {
       {}
       <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
         <p className="font-semibold text-blue-900 dark:text-blue-200 mb-2">Required Columns:</p>
-        <code className="text-xs sm:text-sm text-blue-800 dark:text-blue-300 block font-mono mb-3 bg-white dark:bg-gray-950 p-2 rounded border border-blue-100 dark:border-blue-900">
+        <code className="text-xs sm:text-sm text-blue-800 dark:text-blue-300 block font-mono mb-3 p-2 rounded border border-blue-100 dark:border-blue-900" style={{ background: "var(--panel)" }}>
           {importTypeDescriptions[importType].columns}
         </code>
         <p className="font-semibold mb-2 text-blue-700 dark:text-blue-300">Example:</p>
@@ -263,8 +263,8 @@ const DataImport: React.FC = () => {
       <div className="flex flex-col sm:flex-row gap-3">
         <button
           onClick={() => setStep("upload")}
-          className="px-6 py-2.5 border text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors font-medium shadow-sm"
-          style={{ borderColor: "var(--border)", borderRadius: 0 }}
+          className="px-6 py-2.5 border font-medium shadow-sm hover:opacity-70 transition-opacity"
+          style={{ borderColor: "var(--border)", color: "var(--text-main)", background: "var(--panel)", borderRadius: 0 }}
         >
           Back
         </button>
@@ -320,7 +320,7 @@ const DataImport: React.FC = () => {
           </div>
           <div className="space-y-2 max-h-60 overflow-y-auto">
             {currentJob.stats.validation_errors.slice(0, 10).map((err, idx) => (
-              <div key={idx} className="text-sm p-2 bg-white dark:bg-gray-900 border" style={{ borderColor: "rgba(239, 68, 68, 0.2)", borderRadius: 0 }}>
+              <div key={idx} className="text-sm p-2 border" style={{ borderColor: "rgba(239, 68, 68, 0.2)", background: "var(--panel)", borderRadius: 0 }}>
                 <div className="text-red-900 dark:text-red-200 font-mono">
                   Row {err.row}: {err.error_message}
                 </div>
@@ -332,7 +332,7 @@ const DataImport: React.FC = () => {
               </div>
             ))}
           </div>
-          <label className="flex items-center gap-2 mt-4 p-2 bg-white dark:bg-gray-900" style={{ borderRadius: 0 }}>
+          <label className="flex items-center gap-2 mt-4 p-2" style={{ background: "var(--panel)", borderRadius: 0 }}>
             <input
               type="checkbox"
               checked={proceedWithErrors}
@@ -349,8 +349,8 @@ const DataImport: React.FC = () => {
       <div className="flex flex-col sm:flex-row gap-3">
         <button
           onClick={() => setStep("preview")}
-          className="px-6 py-2.5 border text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors font-medium shadow-sm"
-          style={{ borderColor: "var(--border)", borderRadius: 0 }}
+          className="px-6 py-2.5 border font-medium shadow-sm hover:opacity-70 transition-opacity"
+          style={{ borderColor: "var(--border)", color: "var(--text-main)", background: "var(--panel)", borderRadius: 0 }}
         >
           Back
         </button>
@@ -490,7 +490,7 @@ const DataImport: React.FC = () => {
   return (
     <DashboardLayout>
       {}
-      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-16 z-40">
+      <div className="border-b sticky top-16 z-40" style={{ background: "var(--panel)", borderColor: "var(--border)" }}>
         <div className="max-w-7xl mx-auto px-6 py-4">
           <Breadcrumbs
             items={[
@@ -555,7 +555,7 @@ const DataImport: React.FC = () => {
         </div>
 
         {}
-        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 sm:p-6 lg:p-8 shadow-sm">
+        <div className="glass-card rounded-xl p-4 sm:p-6 lg:p-8 shadow-sm">
           {renderContent()}
         </div>
       </div>

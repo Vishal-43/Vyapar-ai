@@ -198,6 +198,12 @@ class InsightItemResponse(BaseSchema):
     confidence: int
     time_horizon: str = Field(alias="timeHorizon")
 
+class ModelGraphPoint(BaseSchema):
+    day: str
+    actual: float
+    aiForecast: float
+    traditionalForecast: float
+
 class ModelAccuracySummary(BaseSchema):
 
     forecastAccuracy: float
@@ -208,6 +214,7 @@ class ModelAccuracySummary(BaseSchema):
     mapeTraditional: float
     aiAccuracy: float
     traditionalAccuracy: float
+    graphData: list[ModelGraphPoint] = []
 
 class InventoryDashboardItem(BaseSchema):
 
@@ -466,7 +473,7 @@ class CommodityResponse(BaseSchema):
     name: str
     category: str
     unit: str
-    created_at: datetime
+    created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
 class MarketResponse(BaseSchema):
@@ -478,7 +485,7 @@ class MarketResponse(BaseSchema):
     address: Optional[str] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
-    created_at: datetime
+    created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
 class MarketPriceResponse(BaseSchema):
@@ -610,7 +617,7 @@ class BuySellAlertResponse(BaseSchema):
     message: Optional[str] = None
     triggered_at: Optional[datetime] = None
     last_checked_at: Optional[datetime] = None
-    created_at: datetime
+    created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
 class BuySellAlertUpdateRequest(BaseSchema):

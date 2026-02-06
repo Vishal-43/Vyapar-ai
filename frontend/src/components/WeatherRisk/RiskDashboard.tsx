@@ -80,12 +80,12 @@ export const RiskDashboard: React.FC<{ report: WeatherRiskReport }> = ({ report 
 
     {/* Insurance Recommendation */}
     {report.insurance && (
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+      <div className="glass-card rounded-xl shadow-lg p-6 border" style={{ borderColor: "var(--border)" }}>
         <div className="flex items-start gap-3">
           <Shield className="w-6 h-6 text-blue-500 flex-shrink-0 mt-1" />
           <div>
-            <h3 className="text-lg font-semibold mb-2">Insurance Recommendation</h3>
-            <p className="text-gray-700 dark:text-gray-300">{report.insurance}</p>
+            <h3 className="text-lg font-semibold mb-2" style={{ color: "var(--text-main)" }}>Insurance Recommendation</h3>
+            <p style={{ color: "var(--text-soft)" }}>{report.insurance}</p>
           </div>
         </div>
       </div>
@@ -93,8 +93,8 @@ export const RiskDashboard: React.FC<{ report: WeatherRiskReport }> = ({ report 
 
     {/* Alerts */}
     {report.alerts && report.alerts.length > 0 && (
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+      <div className="glass-card rounded-xl shadow-lg p-6 border" style={{ borderColor: "var(--border)" }}>
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2" style={{ color: "var(--text-main)" }}>
           <AlertTriangle className="w-5 h-5 text-orange-500" />
           Weather Alerts
         </h3>
@@ -107,7 +107,7 @@ export const RiskDashboard: React.FC<{ report: WeatherRiskReport }> = ({ report 
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <h4 className="font-semibold text-gray-900 dark:text-gray-100">{alert.alert_type}</h4>
+                    <h4 className="font-semibold" style={{ color: "var(--text-main)" }}>{alert.alert_type}</h4>
                     <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
                       alert.severity === 'CRITICAL' ? 'bg-red-600 text-white' :
                       alert.severity === 'HIGH' ? 'bg-orange-600 text-white' :
@@ -117,7 +117,7 @@ export const RiskDashboard: React.FC<{ report: WeatherRiskReport }> = ({ report 
                       {alert.severity}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-700 dark:text-gray-300">{alert.description}</p>
+                  <p className="text-sm" style={{ color: "var(--text-soft)" }}>{alert.description}</p>
                 </div>
               </div>
             </div>
@@ -128,8 +128,8 @@ export const RiskDashboard: React.FC<{ report: WeatherRiskReport }> = ({ report 
 
     {/* Protective Measures */}
     {report.protective_measures && report.protective_measures.length > 0 && (
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
-        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+      <div className="glass-card rounded-xl shadow-lg p-6 border" style={{ borderColor: "var(--border)" }}>
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2" style={{ color: "var(--text-main)" }}>
           <TrendingUp className="w-5 h-5 text-green-500" />
           Recommended Protective Measures
         </h3>
@@ -137,11 +137,12 @@ export const RiskDashboard: React.FC<{ report: WeatherRiskReport }> = ({ report 
           {report.protective_measures.map((measure, idx) => (
             <div 
               key={idx} 
-              className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition"
+              className="border rounded-lg p-4 hover:bg-emerald-50/10 dark:hover:bg-emerald-900/10 transition"
+              style={{ borderColor: "var(--border)" }}
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
-                  <p className="font-medium text-gray-900 dark:text-gray-100">{measure.measure}</p>
+                  <p className="font-medium" style={{ color: "var(--text-main)" }}>{measure.measure}</p>
                   {measure.effectiveness && (
                     <p className="text-sm text-green-600 dark:text-green-400 mt-1">
                       Effectiveness: {measure.effectiveness}
@@ -153,7 +154,7 @@ export const RiskDashboard: React.FC<{ report: WeatherRiskReport }> = ({ report 
                     <p className="text-lg font-semibold text-blue-600 dark:text-blue-400">
                       ₹{measure.cost.toLocaleString()}
                     </p>
-                    <p className="text-xs text-gray-500">Estimated Cost</p>
+                    <p className="text-xs" style={{ color: "var(--text-soft)" }}>Estimated Cost</p>
                   </div>
                 )}
               </div>

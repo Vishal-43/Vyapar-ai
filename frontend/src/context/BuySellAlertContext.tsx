@@ -82,7 +82,7 @@ export const BuySellAlertProvider: React.FC<BuySellAlertProviderProps> = ({
     setError(null);
     try {
       const url = `${BACKEND_URL}/api/v1/buysell-alerts?limit=1000`;
-      console.log("Fetching alerts from:", url);
+      // console.log("Fetching alerts from:", url);
       
       const response = await fetch(url, {
         method: "GET",
@@ -91,14 +91,14 @@ export const BuySellAlertProvider: React.FC<BuySellAlertProviderProps> = ({
         },
       });
 
-      console.log("Response status:", response.status);
+      // console.log("Response status:", response.status);
 
       if (!response.ok) {
         throw new Error(`Failed to fetch alerts: ${response.statusText}`);
       }
 
       const data = await response.json();
-      console.log("Alerts data received:", data);
+      // console.log("Alerts data received:", data);
       setAlerts(data.alerts || []);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to fetch alerts";

@@ -1,7 +1,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 
 from loguru import logger
@@ -373,7 +373,7 @@ class RecommendationService:
             return False
         rec.acknowledged = True
         rec.acknowledgement_note = note
-        rec.last_evaluated_at = datetime.utcnow()
+        rec.last_evaluated_at = datetime.now(tz=timezone.utc)
         await session.commit()
         return True
 
@@ -407,7 +407,7 @@ class RecommendationService:
         rec.actual_change_pct = actual_change_pct
         rec.roi_pct = roi_pct
         rec.note = note
-        rec.last_evaluated_at = datetime.utcnow()
+        rec.last_evaluated_at = datetime.now(tz=timezone.utc)
         rec.status = "ARCHIVED"
         await session.commit()
         return True
@@ -423,16 +423,21 @@ class RecommendationService:
         history = await cls.get_recommendation_history(session, user_id, limit=100)
         
         if not history:
+            # Calculate empty by_type_accuracy for all recommendation types
+            by_type_accuracy = {rec_type.value: 0.0 for rec_type in RecommendationType}
+            
             return RecommendationMetricsResponse(
                 total_recommendations=0,
                 correct_count=0,
                 incorrect_count=0,
                 partial_count=0,
                 accuracy_rate=0.0,
-                avg_roi_pct=0.0,
+                average_roi_pct=0.0,
+                by_type_accuracy=by_type_accuracy,
                 high_confidence_accuracy=0.0,
                 medium_confidence_accuracy=0.0,
                 low_confidence_accuracy=0.0,
+                generated_at=datetime.now(tz=timezone.utc),
             )
         
         correct = sum(1 for item in history if item.outcome == AccuracyRating.CORRECT)
@@ -460,14 +465,24 @@ class RecommendationService:
             if low_conf else 0.0
         )
 
+        # Calculate accuracy by type
+        by_type_accuracy = {}
+        for rec_type in RecommendationType:
+            type_items = [h for h in history if h.recommendation_type == rec_type]
+            if type_items:
+                by_type_accuracy[rec_type.value] = (
+                    sum(1 for h in type_items if h.outcome == AccuracyRating.CORRECT) / len(type_items)
+                )
+            else:
+                by_type_accuracy[rec_type.value] = 0.0
+
         return RecommendationMetricsResponse(
             total_recommendations=total,
             correct_count=correct,
             incorrect_count=incorrect,
             partial_count=partial,
             accuracy_rate=accuracy_rate,
-            avg_roi_pct=avg_roi,
-            high_confidence_accuracy=high_accuracy,
-            medium_confidence_accuracy=med_accuracy,
-            low_confidence_accuracy=low_accuracy,
+            average_roi_pct=avg_roi,
+            by_type_accuracy=by_type_accuracy,
+            generated_at=datetime.now(tz=timezone.utc),
         )

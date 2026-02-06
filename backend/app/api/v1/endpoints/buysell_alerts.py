@@ -46,9 +46,9 @@ def calculate_signal_strength(
         distance = current_price - sell_threshold
         threshold_range = sell_threshold * 0.1
     
-    if distance <= threshold_range * 0.2:
+    if distance >= threshold_range * 0.5:
         return SignalStrength.STRONG
-    elif distance <= threshold_range * 0.5:
+    elif distance >= threshold_range * 0.2:
         return SignalStrength.MODERATE
     else:
         return SignalStrength.WEAK
@@ -74,7 +74,7 @@ def determine_price_trend(
     else:
         return TrendDirection.STABLE
 
-@router.post("/", response_model=BuySellAlertResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=BuySellAlertResponse, status_code=status.HTTP_201_CREATED)
 async def create_buysell_alert(
     request: BuySellAlertRequest,
     alert_repo: AlertRepository = Depends(get_alert_repo),
@@ -223,7 +223,7 @@ async def get_buysell_alert(
             detail=f"Failed to fetch alert: {str(e)}"
         )
 
-@router.get("/", response_model=BuySellAlertListResponse)
+@router.get("", response_model=BuySellAlertListResponse)
 async def list_buysell_alerts(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),

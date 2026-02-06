@@ -1,6 +1,5 @@
 import { Package } from "lucide-react";
 import { useForecast } from "../../../context/ForecastContext";
-import type { ProductCategory } from "../../../data/forecast-dummy";
 
 const inputBase =
   "w-full h-12 rounded-xl px-4 text-sm transition-colors " +
@@ -35,7 +34,7 @@ export default function ProductSelector() {
         value={selection.category ?? ""}
         onChange={(e) =>
           setSelection({
-            category: e.target.value as ProductCategory,
+            category: e.target.value,
             product: undefined,
           })
         }

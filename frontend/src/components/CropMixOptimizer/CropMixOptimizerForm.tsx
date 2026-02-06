@@ -50,7 +50,7 @@ export const CropMixOptimizerForm: React.FC<{
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+    <div className="glass-card rounded-xl shadow-lg p-6 border" style={{ borderColor: "var(--border)" }}>
       <div className="flex items-center gap-2 mb-6">
         <PieChart className="w-6 h-6 text-green-500" />
         <h2 className="text-xl font-semibold">Optimization Parameters</h2>
@@ -60,7 +60,7 @@ export const CropMixOptimizerForm: React.FC<{
         {/* Basic Information */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="flex items-center gap-2 text-sm font-medium" style={{ color: "var(--text-soft)" }}>
               <Sprout className="w-4 h-4" />
               Total Area (hectares)
             </label>
@@ -68,7 +68,8 @@ export const CropMixOptimizerForm: React.FC<{
               type="number" 
               step="0.01"
               {...register('total_area', { required: 'Total area is required', min: 0.01 })}
-              className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+              className="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-green-500/50 focus:border-transparent transition"
+              style={{ borderColor: "var(--border)", background: "var(--panel)", color: "var(--text-main)" }}
             />
             {errors.total_area && (
               <p className="text-sm text-red-600 dark:text-red-400">{errors.total_area.message}</p>
@@ -76,13 +77,14 @@ export const CropMixOptimizerForm: React.FC<{
           </div>
 
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="flex items-center gap-2 text-sm font-medium" style={{ color: "var(--text-soft)" }}>
               <MapPin className="w-4 h-4" />
               Location
             </label>
             <select 
               {...register('location', { required: 'Location is required' })}
-              className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+              className="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-green-500/50 focus:border-transparent transition"
+              style={{ borderColor: "var(--border)", background: "var(--panel)", color: "var(--text-main)" }}
             >
               <option value="">Select location</option>
               {cities.map(city => (
@@ -95,13 +97,14 @@ export const CropMixOptimizerForm: React.FC<{
           </div>
 
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="flex items-center gap-2 text-sm font-medium" style={{ color: "var(--text-soft)" }}>
               <Calendar className="w-4 h-4" />
               Season
             </label>
             <select 
               {...register('season', { required: 'Season is required' })}
-              className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+              className="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-green-500/50 focus:border-transparent transition"
+              style={{ borderColor: "var(--border)", background: "var(--panel)", color: "var(--text-main)" }}
             >
               <option value="">Select season</option>
               {seasons.map(season => (
@@ -136,12 +139,13 @@ export const CropMixOptimizerForm: React.FC<{
               <div key={idx} className="flex gap-3 items-start">
                 <div className="flex-1 grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                    <label className="text-xs font-medium" style={{ color: "var(--text-soft)" }}>
                       Crop Name
                     </label>
                     <select
                       {...register(`crops.${idx}.name` as const, { required: true })}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent transition text-sm"
+                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500/50 focus:border-transparent transition text-sm"
+                      style={{ borderColor: "var(--border)", background: "var(--panel)", color: "var(--text-main)" }}
                     >
                       {availableCrops.map(cropName => (
                         <option key={cropName} value={cropName}>{cropName}</option>
@@ -149,14 +153,15 @@ export const CropMixOptimizerForm: React.FC<{
                     </select>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                    <label className="text-xs font-medium" style={{ color: "var(--text-soft)" }}>
                       Area (hectares)
                     </label>
                     <input
                       type="number"
                       step="0.01"
                       {...register(`crops.${idx}.area` as const, { required: true, min: 0 })}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent transition text-sm"
+                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500/50 focus:border-transparent transition text-sm"
+                      style={{ borderColor: "var(--border)", background: "var(--panel)", color: "var(--text-main)" }}
                     />
                   </div>
                 </div>

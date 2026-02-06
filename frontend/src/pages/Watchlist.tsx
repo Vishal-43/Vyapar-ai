@@ -49,24 +49,25 @@ export default function Watchlist() {
 
       <main className="relative z-10 max-w-7xl mx-auto px-4 pt-28 space-y-8 pb-12">
         <header>
-          <h1 className="text-3xl font-semibold tracking-tight">
+          <h1 className="text-3xl font-semibold tracking-tight" style={{ color: "var(--text-main)" }}>
             Watchlist & Analytics
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="mt-1" style={{ color: "var(--text-soft)" }}>
             Track your favorite commodities and monitor price movements
           </p>
         </header>
 
         {/* Commodity Selector for Analytics */}
-        <div className="flex flex-wrap gap-4 p-4 rounded-xl bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800">
+        <div className="glass-card flex flex-wrap gap-4 p-4 rounded-xl">
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium mb-1" style={{ color: "var(--text-soft)" }}>
               Commodity
             </label>
             <select
               value={selectedCommodity}
               onChange={(e) => setSelectedCommodity(e.target.value)}
-              className="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900"
+              className="px-4 py-2 rounded-lg border"
+              style={{ borderColor: "var(--border)", background: "var(--panel)", color: "var(--text-main)" }}
             >
               {commodities.map((c) => (
                 <option key={c.id} value={c.name}>
@@ -76,13 +77,14 @@ export default function Watchlist() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium mb-1" style={{ color: "var(--text-soft)" }}>
               Market
             </label>
             <select
               value={selectedMarket}
               onChange={(e) => setSelectedMarket(e.target.value)}
-              className="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900"
+              className="px-4 py-2 rounded-lg border"
+              style={{ borderColor: "var(--border)", background: "var(--panel)", color: "var(--text-main)" }}
             >
               {markets.map((m) => (
                 <option key={m.id} value={m.name}>

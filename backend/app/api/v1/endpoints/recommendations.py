@@ -1,5 +1,5 @@
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -40,7 +40,7 @@ async def list_recommendations(
     return RecommendationListResponse(
         recommendations=recommendations,
         total=len(recommendations),
-        generated_at=recommendations[0].created_at if recommendations else datetime.utcnow(),
+        generated_at=recommendations[0].created_at if recommendations else datetime.now(tz=timezone.utc),
     )
 
 @router.get("/history", response_model=RecommendationHistoryResponse)

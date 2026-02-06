@@ -13,11 +13,12 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from app.config import settings
 from app.database.connection import init_sync_db, get_sync_session
-from app.database.models import Commodity, Market, MarketPrice
+from app.database.models import Commodity, Market, MarketPrice, PredictionMetrics
 from app.database.repositories import (
     MarketPriceRepository,
     PredictionMetricsRepository,
 )
+from sklearn.metrics import mean_squared_error, mean_absolute_error, mean_absolute_percentage_error
 from app.ml.preprocessor import DataPreprocessor
 from app.ml.trainer import ModelTrainer
 from app.ml.ensemble import EnsembleManager
@@ -188,6 +189,77 @@ def train_models(
         tuned_path = Path(settings.model_dir) / f"ensemble_tuned_{timestamp}.joblib"
         joblib.dump(tuned_bundle, tuned_path)
         logger.info(f"Saved tuned ensemble artifact to {tuned_path}")
+
+    # Save metrics to database
+    try:
+        session = next(get_sync_session())
+        timestamp_now = datetime.now()
+        
+        # Save individual model metrics
+        for m_name, m_metrics in trainer.metrics.items():
+            pm = PredictionMetrics(
+                model_name=m_name,
+                model_version=version or "latest",
+                accuracy=m_metrics.get('accuracy'),
+                rmse=m_metrics.get('rmse'),
+                mae=m_metrics.get('mae'),
+                mape=m_metrics.get('mape'),
+                r2_score=m_metrics.get('r2_score'),
+                training_samples=int(len(X_train)),
+                test_samples=int(len(X_test)),
+                last_trained_at=timestamp_now,
+                feature_importance=trainer.get_feature_importance(trainer.models.get(m_name), m_name)
+            )
+            session.add(pm)
+
+        # Calculate and save Ensemble metrics
+        if trainer.models:
+            ensemble_preds = np.zeros_like(y_test, dtype=float)
+            
+            # Determine weights
+            current_weights = {}
+            if save_tuned_ensemble and 'weights' in locals():
+                current_weights = weights
+            else:
+                # Default equal weights
+                w = 1.0 / len(trainer.models)
+                current_weights = {k: w for k in trainer.models.keys()}
+            
+            valid_models_count = 0
+            for m_name, model in trainer.models.items():
+                if m_name in current_weights:
+                    preds = model.predict(X_test)
+                    ensemble_preds += preds * current_weights[m_name]
+                    valid_models_count += 1
+            
+            if valid_models_count > 0:
+                e_mse = mean_squared_error(y_test, ensemble_preds)
+                e_mae = mean_absolute_error(y_test, ensemble_preds)
+                e_mape = mean_absolute_percentage_error(y_test, ensemble_preds)
+                e_accuracy = max(0, 1 - e_mape)
+                
+                ensemble_pm = PredictionMetrics(
+                    model_name="ensemble",
+                    model_version=version or "latest",
+                    accuracy=e_accuracy,
+                    rmse=np.sqrt(e_mse),
+                    mae=e_mae,
+                    mape=e_mape,
+                    training_samples=int(len(X_train)),
+                    test_samples=int(len(X_test)),
+                    last_trained_at=timestamp_now
+                )
+                session.add(ensemble_pm)
+                trainer.metrics['ensemble'] = {
+                    'accuracy': e_accuracy, 'rmse': np.sqrt(e_mse), 
+                    'mae': e_mae, 'mape': e_mape
+                }
+        
+        session.commit()
+        session.close()
+        logger.info("Successfully saved prediction metrics to database")
+    except Exception as e:
+        logger.error(f"Failed to save metrics to database: {e}")
 
     return {
         'results': results,

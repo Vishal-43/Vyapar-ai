@@ -421,6 +421,30 @@ class PredictionRepository(BaseRepository):
         
         return sum(p.accuracy for p in predictions if p.accuracy) / len(predictions)
 
+    async def get_recent(self, days: int = 7, limit: int = 50) -> List[Prediction]:
+        """Get recent predictions within specified days."""
+        cutoff_date = (get_current_timestamp() - timedelta(days=days)).date()
+        
+        query = (
+            select(Prediction)
+            .where(Prediction.prediction_date >= cutoff_date)
+            .order_by(desc(Prediction.created_at))
+            .limit(limit)
+        )
+        result = await self.db.execute(query)
+        return result.scalars().all()
+
+    async def get_with_actuals(self, limit: int = 100) -> List[Prediction]:
+        """Get predictions that have actual prices recorded."""
+        query = (
+            select(Prediction)
+            .where(Prediction.actual_price.isnot(None))
+            .order_by(desc(Prediction.prediction_date))
+            .limit(limit)
+        )
+        result = await self.db.execute(query)
+        return result.scalars().all()
+
 class DiscussionRepository(BaseRepository):
 
     def __init__(self, db: AsyncSession):

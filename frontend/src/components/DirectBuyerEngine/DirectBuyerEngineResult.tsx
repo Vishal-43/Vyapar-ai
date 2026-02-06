@@ -31,21 +31,21 @@ const getScoreBg = (score: number) => {
 export const DirectBuyerEngineResult: React.FC<DirectBuyerEngineResultProps> = ({ results, loading }) => {
   if (loading) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-12 border border-gray-200 dark:border-gray-700 text-center">
+      <div className="glass-card rounded-xl shadow-lg p-12 border text-center" style={{ borderColor: "var(--border)" }}>
         <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-        <p className="text-gray-600 dark:text-gray-400">Finding optimal matches...</p>
+        <p style={{ color: "var(--text-soft)" }}>Finding optimal matches...</p>
       </div>
     );
   }
 
   if (!results || results.length === 0) {
     return (
-      <div className="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-12 text-center">
-        <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+      <div className="rounded-lg p-12 text-center border" style={{ background: "var(--panel)", borderColor: "var(--border)" }}>
+        <Package className="w-16 h-16 mx-auto mb-4" style={{ color: "var(--text-soft)" }} />
+        <h3 className="text-lg font-semibold mb-2" style={{ color: "var(--text-main)" }}>
           No Matches Found
         </h3>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p style={{ color: "var(--text-soft)" }}>
           Load sample data and click "Match Buyers & Sellers" to see results.
         </p>
       </div>
@@ -68,8 +68,8 @@ export const DirectBuyerEngineResult: React.FC<DirectBuyerEngineResultProps> = (
       </div>
 
       {/* Match Results */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+      <div className="glass-card rounded-xl shadow-lg border overflow-hidden" style={{ borderColor: "var(--border)" }}>
+        <div className="p-6 border-b" style={{ borderColor: "var(--border)" }}>
           <h3 className="text-lg font-semibold flex items-center gap-2">
             <LinkIcon className="w-5 h-5 text-purple-500" />
             Match Results
@@ -78,34 +78,34 @@ export const DirectBuyerEngineResult: React.FC<DirectBuyerEngineResultProps> = (
 
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 dark:bg-gray-900/50">
+            <thead style={{ background: "var(--panel)" }}>
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-soft)" }}>
                   Buyer ID
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-soft)" }}>
                   Seller ID
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-soft)" }}>
                   Commodity
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-soft)" }}>
                   Quantity
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: "var(--text-soft)" }}>
                   Match Score
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody className="divide-y" style={{ borderColor: "var(--border)" }}>
               {results.map((result, idx) => (
-                <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
+                <tr key={idx} className="transition" style={{ cursor: "default" }} onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"} onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       <div className="bg-blue-100 dark:bg-blue-900/30 p-1.5 rounded">
                         <TrendingUp className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                       </div>
-                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                      <span className="text-sm font-medium" style={{ color: "var(--text-main)" }}>
                         Buyer #{result.buyer_id}
                       </span>
                     </div>
@@ -115,18 +115,18 @@ export const DirectBuyerEngineResult: React.FC<DirectBuyerEngineResultProps> = (
                       <div className="bg-green-100 dark:bg-green-900/30 p-1.5 rounded">
                         <Package className="w-4 h-4 text-green-600 dark:text-green-400" />
                       </div>
-                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                      <span className="text-sm font-medium" style={{ color: "var(--text-main)" }}>
                         Seller #{result.seller_id}
                       </span>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm text-gray-900 dark:text-gray-100 font-medium">
+                    <span className="text-sm font-medium" style={{ color: "var(--text-main)" }}>
                       {result.commodity}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                    <span className="text-sm" style={{ color: "var(--text-soft)" }}>
                       {result.quantity} units
                     </span>
                   </td>

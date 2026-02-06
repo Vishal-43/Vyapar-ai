@@ -7,7 +7,6 @@ import StockComponent from "../components/ProductAnalysis/StockComponent";
 import PriceChart from "../components/ProductAnalysis/PriceChart";
 import DemandGraph from "../components/ProductAnalysis/DemandGraph";
 import ImpactComponent from "../components/ProductAnalysis/ImpactComponent";
-import RecommendTable from "../components/ProductAnalysis/RecommendTable";
 import MarketComparison from "../components/ProductAnalysis/MarketComparison";
 import ProfitCalculator from "../components/ProductAnalysis/ProfitCalculator";
 import PriceAlerts from "../components/ProductAnalysis/PriceAlerts";
@@ -54,9 +53,6 @@ const ProductAnalysis = () => {
         
         {/* Impact Analysis */}
         <ImpactComponent />
-        
-        {/* Recommendations */}
-        <RecommendTable />
       </main>
 
       <DashFooter />

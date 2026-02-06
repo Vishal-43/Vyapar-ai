@@ -43,7 +43,7 @@ export const DirectBuyerEngineForm: React.FC<DirectBuyerEngineFormProps> = ({ on
   const canSubmit = buyers.length > 0 && sellers.length > 0 && !loading;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+    <div className="glass-card rounded-xl shadow-lg p-6 border" style={{ borderColor: "var(--border)" }}>
       <div className="flex items-center gap-2 mb-6">
         <LinkIcon className="w-6 h-6 text-purple-500" />
         <h2 className="text-xl font-semibold">Matching Parameters</h2>
@@ -82,7 +82,7 @@ export const DirectBuyerEngineForm: React.FC<DirectBuyerEngineFormProps> = ({ on
           <button
             onClick={addDummyData}
             disabled={loading}
-            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors duration-200"
+            className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors duration-200"
           >
             <UserPlus className="w-5 h-5" />
             Load Sample Data
@@ -109,18 +109,18 @@ export const DirectBuyerEngineForm: React.FC<DirectBuyerEngineFormProps> = ({ on
 
         {/* Data Preview */}
         {(buyers.length > 0 || sellers.length > 0) && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t" style={{ borderColor: "var(--border)" }}>
             {buyers.length > 0 && (
               <div>
-                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                <h3 className="text-sm font-semibold mb-2 flex items-center gap-2" style={{ color: "var(--text-soft)" }}>
                   <ShoppingCart className="w-4 h-4" />
                   Buyer Profiles
                 </h3>
                 <div className="space-y-2">
                   {buyers.map((buyer) => (
-                    <div key={buyer.id} className="text-sm bg-gray-50 dark:bg-gray-900 rounded p-2">
-                      <p className="font-medium text-gray-900 dark:text-gray-100">{buyer.name}</p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">
+                    <div key={buyer.id} className="text-sm rounded p-2" style={{ background: "var(--panel)", border: "1px solid var(--border)" }}>
+                      <p className="font-medium" style={{ color: "var(--text-main)" }}>{buyer.name}</p>
+                      <p className="text-xs" style={{ color: "var(--text-soft)" }}>
                         {buyer.location} • {buyer.commodities.join(', ')} • {buyer.min_quantity}-{buyer.max_quantity} qty
                       </p>
                     </div>
@@ -131,15 +131,15 @@ export const DirectBuyerEngineForm: React.FC<DirectBuyerEngineFormProps> = ({ on
 
             {sellers.length > 0 && (
               <div>
-                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                <h3 className="text-sm font-semibold mb-2 flex items-center gap-2" style={{ color: "var(--text-soft)" }}>
                   <Store className="w-4 h-4" />
                   Seller Profiles
                 </h3>
                 <div className="space-y-2">
                   {sellers.map((seller) => (
-                    <div key={seller.id} className="text-sm bg-gray-50 dark:bg-gray-900 rounded p-2">
-                      <p className="font-medium text-gray-900 dark:text-gray-100">{seller.name}</p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">
+                    <div key={seller.id} className="text-sm rounded p-2" style={{ background: "var(--panel)", border: "1px solid var(--border)" }}>
+                      <p className="font-medium" style={{ color: "var(--text-main)" }}>{seller.name}</p>
+                      <p className="text-xs" style={{ color: "var(--text-soft)" }}>
                         {seller.location} • {seller.commodities.join(', ')} • {seller.available_quantity} qty available
                       </p>
                     </div>

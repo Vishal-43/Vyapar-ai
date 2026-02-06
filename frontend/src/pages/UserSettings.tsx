@@ -116,7 +116,7 @@ export default function UserSettings() {
           </div>
         )}
 
-        <div className="flex gap-4 mb-8 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex gap-4 mb-8 border-b" style={{ borderColor: "var(--border)" }}>
           {[
             { id: "profile", label: "Profile", icon: FiUser },
             { id: "security", label: "Security", icon: FiLock },
@@ -137,7 +137,7 @@ export default function UserSettings() {
           ))}
         </div>
 
-        <div className="bg-white dark:bg-[#1a2f2f] rounded-lg border border-gray-200 dark:border-gray-700 p-8">
+        <div className="glass-card rounded-lg p-8">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin h-8 w-8 border-b-2 border-[rgb(var(--emerald-main))]"></div>
@@ -185,7 +185,7 @@ export default function UserSettings() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium mb-2" style={{ color: "var(--text-soft)" }}>
                     Phone
                   </label>
                   <input
@@ -193,11 +193,12 @@ export default function UserSettings() {
                     value={editMode ? formData.phone : (profile?.phone || user?.primaryPhoneNumber?.phoneNumber || "")}
                     onChange={(e) => editMode && setFormData({ ...formData, phone: e.target.value })}
                     disabled={!editMode}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-[#0a1515] text-gray-900 dark:text-white disabled:opacity-50"
+                    className="w-full px-4 py-2 border focus:outline-none focus:ring-2 transition disabled:opacity-50"
+                    style={{ borderColor: "var(--border)", background: "var(--panel)", color: "var(--text-main)", borderRadius: 0 }}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium mb-2" style={{ color: "var(--text-soft)" }}>
                     Organization
                   </label>
                   <input
@@ -205,11 +206,12 @@ export default function UserSettings() {
                     value={editMode ? formData.organization : profile?.organization}
                     onChange={(e) => editMode && setFormData({ ...formData, organization: e.target.value })}
                     disabled={!editMode}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-[#0a1515] text-gray-900 dark:text-white disabled:opacity-50"
+                    className="w-full px-4 py-2 border focus:outline-none focus:ring-2 transition disabled:opacity-50"
+                    style={{ borderColor: "var(--border)", background: "var(--panel)", color: "var(--text-main)", borderRadius: 0 }}
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium mb-2" style={{ color: "var(--text-soft)" }}>
                     Bio
                   </label>
                   <textarea
@@ -217,7 +219,8 @@ export default function UserSettings() {
                     onChange={(e) => editMode && setFormData({ ...formData, bio: e.target.value })}
                     disabled={!editMode}
                     rows={3}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-[#0a1515] text-gray-900 dark:text-white disabled:opacity-50"
+                    className="w-full px-4 py-2 border focus:outline-none focus:ring-2 transition disabled:opacity-50"
+                    style={{ borderColor: "var(--border)", background: "var(--panel)", color: "var(--text-main)", borderRadius: 0 }}
                   />
                 </div>
               </div>
@@ -254,12 +257,12 @@ export default function UserSettings() {
           ) : activeTab === "security" ? (
             <div className="space-y-6">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Active Sessions</h3>
+                <h3 className="text-lg font-semibold mb-4" style={{ color: "var(--text-main)" }}>Active Sessions</h3>
                 <div className="space-y-3">
                   {sessions?.map((session) => (
-                    <div key={session.session_id} className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                    <div key={session.session_id} className="flex items-center justify-between p-4 border rounded-lg" style={{ borderColor: "var(--border)" }}>
                       <div>
-                        <p className="font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                        <p className="font-medium flex items-center gap-2" style={{ color: "var(--text-main)" }}>
                           {session.device}
                           {session.is_current && (
                             <span className="px-2 py-1 text-xs bg-emerald-100 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 rounded">
@@ -267,8 +270,8 @@ export default function UserSettings() {
                             </span>
                           )}
                         </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">IP: {session.ip_address}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                        <p className="text-sm" style={{ color: "var(--text-soft)" }}>IP: {session.ip_address}</p>
+                        <p className="text-xs mt-1" style={{ color: "var(--text-soft)" }}>
                           Last active: {new Date(session.last_activity).toLocaleString()}
                         </p>
                       </div>
@@ -285,7 +288,8 @@ export default function UserSettings() {
                 </div>
                 <button
                   onClick={handleRevokeAllSessions}
-                  className="mt-4 px-4 py-2 border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/10 transition flex items-center gap-2"
+                  className="mt-4 px-4 py-2 border text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/10 transition flex items-center gap-2"
+                  style={{ borderColor: "rgba(220, 38, 38, 0.3)" }}
                 >
                   <FiLogOut size={18} /> Log Out All Other Devices
                 </button>

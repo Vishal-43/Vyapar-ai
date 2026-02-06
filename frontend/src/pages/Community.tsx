@@ -62,11 +62,13 @@ export default function Community() {
     fetchDiscussions();
   }, []);
 
+  const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000';
+
   const fetchDiscussions = async () => {
     try {
       setLoading(true);
       setError(null);
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      
       const response = await fetch(`${API_BASE_URL}/api/v1/discussions`);
 
       if (!response.ok) {
@@ -119,7 +121,7 @@ export default function Community() {
     
     try {
       const response = await fetch(
-        `http://localhost:8000/api/v1/discussions/${id}/like/toggle?user_id=${user.id}`,
+        `${API_BASE_URL}/api/v1/discussions/${id}/like/toggle?user_id=${user.id}`,
         { method: "POST" }
       );
       
@@ -156,7 +158,7 @@ export default function Community() {
     // Fetch comments if not already loaded
     if (!comments[id]) {
       try {
-        const response = await fetch(`http://localhost:8000/api/v1/discussions/${id}/comments`);
+        const response = await fetch(`${API_BASE_URL}/api/v1/discussions/${id}/comments`);
         if (response.ok) {
           const data = await response.json();
           setComments((prev) => ({ ...prev, [id]: data.comments || [] }));
@@ -171,7 +173,7 @@ export default function Community() {
     if (!newComment.trim() || !user) return;
     
     try {
-      const response = await fetch(`http://localhost:8000/api/v1/discussions/${discussionId}/comments`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/discussions/${discussionId}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -204,7 +206,7 @@ export default function Community() {
     
     setCreateLoading(true);
     try {
-      const response = await fetch("http://localhost:8000/api/v1/discussions/", {
+      const response = await fetch(`${API_BASE_URL}/api/v1/discussions/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -233,14 +235,14 @@ export default function Community() {
 
   return (
     <DashboardLayout>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen" style={{ background: "var(--bg)" }}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
           <div className="mb-6 sm:mb-8 flex justify-between items-center">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold mb-2" style={{ color: "var(--text-main)" }}>
                 Discussion Board
               </h1>
-              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+              <p className="text-sm sm:text-base" style={{ color: "var(--text-soft)" }}>
                 Discuss commodity prices and trading strategies with the community.
               </p>
             </div>
@@ -280,7 +282,8 @@ export default function Community() {
             <select
               value={selectedCommodity || ""}
               onChange={(e) => setSelectedCommodity(e.target.value || null)}
-              className="w-full sm:w-auto px-3 py-2.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-600 transition"
+              className="w-full sm:w-auto px-3 py-2.5 text-sm rounded-lg border focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
+              style={{ borderColor: "var(--border)", background: "var(--panel)", color: "var(--text-main)" }}
             >
               <option value="">All Commodities</option>
               {commodities.map((c) => (
@@ -307,7 +310,7 @@ export default function Community() {
                   <Loader className="w-12 h-12 sm:w-14 sm:h-14 text-emerald-500 dark:text-emerald-400 animate-spin" />
                   <div className="absolute inset-0 blur-xl bg-emerald-500/30 dark:bg-emerald-400/30 animate-pulse"></div>
                 </div>
-                <p className="text-gray-600 dark:text-gray-400 font-medium mt-4 text-sm sm:text-base">
+                <p className="font-medium mt-4 text-sm sm:text-base" style={{ color: "var(--text-soft)" }}>
                   Loading discussions...
                 </p>
               </div>
@@ -334,7 +337,7 @@ export default function Community() {
                 filteredDiscussions.map((discussion) => (
                   <div
                     key={discussion.id}
-                    className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-5 border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:border-gray-300 dark:hover:border-gray-600 transition-all"
+                    className="glass-card rounded-xl p-4 sm:p-5 hover:shadow-lg transition-all"
                   >
                     <div className="flex gap-3 sm:gap-4">
                       <img
@@ -345,10 +348,10 @@ export default function Community() {
 
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                          <span className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">
+                          <span className="font-semibold text-sm sm:text-base" style={{ color: "var(--text-main)" }}>
                             {discussion.author}
                           </span>
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                          <span className="text-xs" style={{ color: "var(--text-soft)" }}>
                             {timeAgo(discussion.timestamp)}
                           </span>
                           <span className="text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 px-2 py-0.5 rounded-full font-medium">
@@ -361,11 +364,11 @@ export default function Community() {
                           )}
                         </div>
 
-                        <h3 className="font-semibold text-gray-900 dark:text-white mb-1.5 text-sm sm:text-base">
+                        <h3 className="font-semibold mb-1.5 text-sm sm:text-base" style={{ color: "var(--text-main)" }}>
                           {discussion.title}
                         </h3>
 
-                        <p className="text-gray-700 dark:text-gray-300 text-sm mb-3 line-clamp-2">
+                        <p className="text-sm mb-3 line-clamp-2" style={{ color: "var(--text-main)" }}>
                           {discussion.content}
                         </p>
 
@@ -374,7 +377,8 @@ export default function Community() {
                             {discussion.tags.map((tag, i) => (
                               <span
                                 key={i}
-                                className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-0.5 rounded-full"
+                                className="text-xs px-2 py-0.5 rounded-full"
+                                style={{ background: "var(--panel)", color: "var(--text-soft)" }}
                               >
                                 #{tag}
                               </span>
@@ -388,8 +392,9 @@ export default function Community() {
                             className={`flex items-center gap-1.5 transition text-sm font-medium ${
                               likedDiscussions.has(discussion.id) || discussion.liked
                                 ? "text-red-500 dark:text-red-400"
-                                : "text-gray-600 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400"
+                                : "hover:text-red-500 dark:hover:text-red-400"
                             }`}
+                            style={likedDiscussions.has(discussion.id) || discussion.liked ? {} : { color: "var(--text-soft)" }}
                           >
                             <Heart 
                               size={16} 
@@ -400,7 +405,8 @@ export default function Community() {
                           </button>
                           <button
                             onClick={() => toggleComments(discussion.id)}
-                            className="flex items-center gap-1.5 text-gray-600 dark:text-gray-400 hover:text-emerald-500 dark:hover:text-emerald-400 transition text-sm font-medium"
+                            className="flex items-center gap-1.5 hover:text-emerald-500 transition text-sm font-medium"
+                            style={{ color: "var(--text-soft)" }}
                           >
                             <MessageCircle size={16} className="flex-shrink-0" />
                             <span>{discussion.replies}</span>
@@ -409,7 +415,7 @@ export default function Community() {
                         
                         {/* Comments Section */}
                         {expandedDiscussion === discussion.id && (
-                          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                          <div className="mt-4 pt-4 border-t" style={{ borderColor: "var(--border)" }}>
                             {/* Add Comment Input */}
                             <div className="flex gap-2 mb-4">
                               <input
@@ -417,13 +423,14 @@ export default function Community() {
                                 value={newComment}
                                 onChange={(e) => setNewComment(e.target.value)}
                                 placeholder="Write a comment..."
-                                className="flex-1 px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                className="flex-1 px-3 py-2 text-sm rounded-lg border focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                style={{ borderColor: "var(--border)", background: "var(--panel)", color: "var(--text-main)" }}
                                 onKeyDown={(e) => e.key === "Enter" && handleAddComment(discussion.id)}
                               />
                               <button
                                 onClick={() => handleAddComment(discussion.id)}
                                 disabled={!newComment.trim()}
-                                className="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 text-white rounded-lg transition"
+                                className="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-lg transition"
                               >
                                 <Send size={16} />
                               </button>
@@ -439,23 +446,23 @@ export default function Community() {
                                       alt={comment.author}
                                       className="w-8 h-8 rounded-full flex-shrink-0"
                                     />
-                                    <div className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2">
+                                    <div className="flex-1 rounded-lg px-3 py-2" style={{ background: "var(--panel)" }}>
                                       <div className="flex items-center gap-2 mb-1">
-                                        <span className="font-medium text-sm text-gray-900 dark:text-white">
+                                        <span className="font-medium text-sm" style={{ color: "var(--text-main)" }}>
                                           {comment.author}
                                         </span>
-                                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                                        <span className="text-xs" style={{ color: "var(--text-soft)" }}>
                                           {timeAgo(new Date(comment.created_at))}
                                         </span>
                                       </div>
-                                      <p className="text-sm text-gray-700 dark:text-gray-300">
+                                      <p className="text-sm" style={{ color: "var(--text-main)" }}>
                                         {comment.content}
                                       </p>
                                     </div>
                                   </div>
                                 ))
                               ) : (
-                                <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+                                <p className="text-sm text-center py-4" style={{ color: "var(--text-soft)" }}>
                                   No comments yet. Be the first to comment!
                                 </p>
                               )}
@@ -467,8 +474,8 @@ export default function Community() {
                   </div>
                 ))
               ) : (
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-10 sm:p-12 text-center border border-dashed border-gray-300 dark:border-gray-700">
-                  <p className="text-gray-500 dark:text-gray-400">
+                <div className="glass-card rounded-xl p-10 sm:p-12 text-center border border-dashed">
+                  <p style={{ color: "var(--text-soft)" }}>
                     {discussions.length === 0
                       ? "No discussions found"
                       : "No discussions match your search"}
@@ -480,30 +487,30 @@ export default function Community() {
 
           {!loading && !error && discussions.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 lg:gap-5 mt-6 sm:mt-8 lg:mt-10">
-              <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl p-4 sm:p-5 lg:p-6 border border-gray-200 dark:border-gray-700 text-center shadow-lg hover:shadow-2xl hover:shadow-emerald-500/10 transition-all group">
+              <div className="glass-card backdrop-blur-xl rounded-2xl p-4 sm:p-5 lg:p-6 text-center shadow-lg hover:shadow-2xl hover:shadow-emerald-500/10 transition-all group">
                 <MessageSquare className="w-8 h-8 sm:w-10 sm:h-10 text-emerald-600 dark:text-emerald-400 mx-auto mb-3 group-hover:scale-110 transition-transform" />
                 <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-emerald-600 dark:text-emerald-400 mb-2">
                   {discussions.length}
                 </div>
-                <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium">
+                <div className="text-xs sm:text-sm font-medium" style={{ color: "var(--text-soft)" }}>
                   Discussions
                 </div>
               </div>
-              <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl p-4 sm:p-5 lg:p-6 border border-gray-200 dark:border-gray-700 text-center shadow-lg hover:shadow-2xl hover:shadow-blue-500/10 transition-all group">
+              <div className="glass-card backdrop-blur-xl rounded-2xl p-4 sm:p-5 lg:p-6 text-center shadow-lg hover:shadow-2xl hover:shadow-blue-500/10 transition-all group">
                 <TrendingUp className="w-8 h-8 sm:w-10 sm:h-10 text-blue-600 dark:text-blue-400 mx-auto mb-3 group-hover:scale-110 transition-transform" />
                 <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
                   {commodities.length}
                 </div>
-                <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium">
+                <div className="text-xs sm:text-sm font-medium" style={{ color: "var(--text-soft)" }}>
                   Commodities
                 </div>
               </div>
-              <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl p-4 sm:p-5 lg:p-6 border border-gray-200 dark:border-gray-700 text-center shadow-lg hover:shadow-2xl hover:shadow-purple-500/10 transition-all group">
+              <div className="glass-card backdrop-blur-xl rounded-2xl p-4 sm:p-5 lg:p-6 text-center shadow-lg hover:shadow-2xl hover:shadow-purple-500/10 transition-all group">
                 <Users className="w-8 h-8 sm:w-10 sm:h-10 text-purple-600 dark:text-purple-400 mx-auto mb-3 group-hover:scale-110 transition-transform" />
                 <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-purple-600 dark:text-purple-400 mb-2">
                   {discussions.reduce((sum, d) => sum + d.replies, 0)}
                 </div>
-                <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium">
+                <div className="text-xs sm:text-sm font-medium" style={{ color: "var(--text-soft)" }}>
                   Total Replies
                 </div>
               </div>
@@ -516,22 +523,23 @@ export default function Community() {
       {/* Create Post Modal */}
       {isCreateOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-lg p-6 shadow-xl">
+          <div className="glass-card rounded-xl w-full max-w-lg p-6 shadow-xl">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+              <h2 className="text-xl font-bold" style={{ color: "var(--text-main)" }}>
                 Create New Post
               </h2>
               <button
                 onClick={() => setIsCreateOpen(false)}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition"
+                className="p-2 rounded-lg transition hover:opacity-70"
+                style={{ background: "var(--panel)" }}
               >
-                <X size={20} className="text-gray-500" />
+                <X size={20} style={{ color: "var(--text-soft)" }} />
               </button>
             </div>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium mb-1" style={{ color: "var(--text-soft)" }}>
                   Title *
                 </label>
                 <input
@@ -539,12 +547,13 @@ export default function Community() {
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                   placeholder="Enter post title..."
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  style={{ borderColor: "var(--border)", background: "var(--panel)", color: "var(--text-main)" }}
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium mb-1" style={{ color: "var(--text-soft)" }}>
                   Commodity *
                 </label>
                 <input
@@ -552,12 +561,13 @@ export default function Community() {
                   value={newCommodity}
                   onChange={(e) => setNewCommodity(e.target.value)}
                   placeholder="e.g., Wheat, Rice, Onion..."
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  style={{ borderColor: "var(--border)", background: "var(--panel)", color: "var(--text-main)" }}
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium mb-1" style={{ color: "var(--text-soft)" }}>
                   Content *
                 </label>
                 <textarea
@@ -565,21 +575,23 @@ export default function Community() {
                   onChange={(e) => setNewContent(e.target.value)}
                   placeholder="Share your thoughts..."
                   rows={4}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+                  className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+                  style={{ borderColor: "var(--border)", background: "var(--panel)", color: "var(--text-main)" }}
                 />
               </div>
               
               <div className="flex gap-3 pt-2">
                 <button
                   onClick={() => setIsCreateOpen(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition font-medium"
+                  className="flex-1 px-4 py-2 border rounded-lg hover:opacity-70 transition font-medium"
+                  style={{ borderColor: "var(--border)", color: "var(--text-main)", background: "var(--panel)" }}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleCreatePost}
                   disabled={createLoading || !newTitle.trim() || !newContent.trim() || !newCommodity.trim()}
-                  className="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 text-white rounded-lg transition font-medium flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-lg transition font-medium flex items-center justify-center gap-2"
                 >
                   {createLoading ? (
                     <Loader size={16} className="animate-spin" />

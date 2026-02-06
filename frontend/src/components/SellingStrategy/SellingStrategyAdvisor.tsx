@@ -158,11 +158,12 @@ export default function SellingStrategyAdvisor() {
         <form onSubmit={onSubmit} className="space-y-5">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm text-gray-600 dark:text-gray-300">Commodity</label>
+              <label className="text-sm font-medium" style={{ color: "var(--text-soft)" }}>Commodity</label>
               <select
                 value={selectedCommodityId}
                 onChange={(event) => setSelectedCommodityId(Number(event.target.value))}
-                className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm"
+                className="w-full rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 transition-all"
+                style={{ borderColor: "var(--border)", background: "var(--panel)", color: "var(--text-main)" }}
               >
                 <option value="">Select commodity</option>
                 {commodities.map((commodity) => (
@@ -174,11 +175,12 @@ export default function SellingStrategyAdvisor() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm text-gray-600 dark:text-gray-300">Market (optional)</label>
+              <label className="text-sm font-medium" style={{ color: "var(--text-soft)" }}>Market (optional)</label>
               <select
                 value={selectedMarketId}
                 onChange={(event) => setSelectedMarketId(event.target.value ? Number(event.target.value) : "")}
-                className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm"
+                className="w-full rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 transition-all"
+                style={{ borderColor: "var(--border)", background: "var(--panel)", color: "var(--text-main)" }}
               >
                 <option value="">All markets</option>
                 {markets.map((market) => (
@@ -192,25 +194,27 @@ export default function SellingStrategyAdvisor() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm text-gray-600 dark:text-gray-300">Quantity (quintals)</label>
+              <label className="text-sm font-medium" style={{ color: "var(--text-soft)" }}>Quantity (quintals)</label>
               <input
                 type="number"
                 min="1"
                 value={quantity}
                 onChange={(event) => setQuantity(event.target.value)}
-                className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm"
+                className="w-full rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 transition-all"
+                style={{ borderColor: "var(--border)", background: "var(--panel)", color: "var(--text-main)" }}
                 placeholder="e.g. 10"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm text-gray-600 dark:text-gray-300">Current Price (per quintal)</label>
+              <label className="text-sm font-medium" style={{ color: "var(--text-soft)" }}>Current Price (per quintal)</label>
               <input
                 type="number"
                 min="1"
                 value={currentPrice}
                 onChange={(event) => setCurrentPrice(event.target.value)}
-                className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm"
+                className="w-full rounded-lg border px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500/50 transition-all"
+                style={{ borderColor: "var(--border)", background: "var(--panel)", color: "var(--text-main)" }}
                 placeholder="e.g. 2300"
               />
             </div>
@@ -225,7 +229,7 @@ export default function SellingStrategyAdvisor() {
               {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Leaf className="h-4 w-4" />}
               Generate Strategy
             </button>
-            {isFetching && <span className="text-xs text-gray-500">Loading commodities and markets...</span>}
+            {isFetching && <span className="text-xs" style={{ color: "var(--text-soft)" }}>Loading commodities and markets...</span>}
           </div>
 
           {error && (
@@ -242,21 +246,21 @@ export default function SellingStrategyAdvisor() {
           <CardComponent title="Recommended Strategy" icon={<CheckCircle2 className="w-5 h-5" />}>
             <div className="space-y-3 text-sm">
               <div className="flex items-center justify-between">
-                <span className="text-gray-500">Strategy</span>
-                <span className="font-semibold">{recommendation.strategy}</span>
+                <span style={{ color: "var(--text-soft)" }}>Strategy</span>
+                <span className="font-semibold" style={{ color: "var(--text-main)" }}>{recommendation.strategy}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-500">Confidence</span>
-                <span className="font-semibold">
+                <span style={{ color: "var(--text-soft)" }}>Confidence</span>
+                <span className="font-semibold" style={{ color: "var(--text-main)" }}>
                   {(recommendation.confidence_score * 100).toFixed(0)}%
                 </span>
               </div>
               <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs ${riskColor(recommendation.risk_level)}`}>
                 Risk: {recommendation.risk_level}
               </div>
-              <p className="text-gray-700 dark:text-gray-200">{recommendation.recommended_action}</p>
-              <p className="text-gray-500">{recommendation.reasoning}</p>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
+              <p style={{ color: "var(--text-main)" }}>{recommendation.recommended_action}</p>
+              <p style={{ color: "var(--text-soft)" }}>{recommendation.reasoning}</p>
+              <div className="flex items-center gap-2 text-xs" style={{ color: "var(--text-soft)" }}>
                 <TrendingUp className="h-4 w-4" />
                 Price trend: {recommendation.price_trend}
               </div>
@@ -267,35 +271,35 @@ export default function SellingStrategyAdvisor() {
             <div className="space-y-4 text-sm">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-gray-500">Revenue if sold now</p>
-                  <p className="font-semibold text-lg">{formatINR(recommendation.current_revenue)}</p>
+                  <p style={{ color: "var(--text-soft)" }}>Revenue if sold now</p>
+                  <p className="font-semibold text-lg" style={{ color: "var(--text-main)" }}>{formatINR(recommendation.current_revenue)}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500">Expected revenue</p>
-                  <p className="font-semibold text-lg">{formatINR(recommendation.expected_revenue)}</p>
+                  <p style={{ color: "var(--text-soft)" }}>Expected revenue</p>
+                  <p className="font-semibold text-lg" style={{ color: "var(--text-main)" }}>{formatINR(recommendation.expected_revenue)}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-gray-500">Expected price</p>
-                  <p className="font-semibold">{formatINR(recommendation.expected_price)}</p>
+                  <p style={{ color: "var(--text-soft)" }}>Expected price</p>
+                  <p className="font-semibold" style={{ color: "var(--text-main)" }}>{formatINR(recommendation.expected_price)}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500">Price increase</p>
-                  <p className="font-semibold">{recommendation.price_increase_percent?.toFixed(1) ?? "—"}%</p>
+                  <p style={{ color: "var(--text-soft)" }}>Price increase</p>
+                  <p className="font-semibold" style={{ color: "var(--text-main)" }}>{recommendation.price_increase_percent?.toFixed(1) ?? "—"}%</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-gray-500">Storage cost</p>
-                  <p className="font-semibold">{formatINR(recommendation.storage_cost)}</p>
+                  <p style={{ color: "var(--text-soft)" }}>Storage cost</p>
+                  <p className="font-semibold" style={{ color: "var(--text-main)" }}>{formatINR(recommendation.storage_cost)}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500">Net profit gain</p>
-                  <p className="font-semibold">{formatINR(recommendation.net_profit_gain)}</p>
+                  <p style={{ color: "var(--text-soft)" }}>Net profit gain</p>
+                  <p className="font-semibold" style={{ color: "var(--text-main)" }}>{formatINR(recommendation.net_profit_gain)}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
+              <div className="flex items-center gap-2 text-xs" style={{ color: "var(--text-soft)" }}>
                 <Calendar className="h-4 w-4" />
                 Recommended sell date: {recommendation.recommended_sell_date || "—"}
               </div>
@@ -305,28 +309,29 @@ export default function SellingStrategyAdvisor() {
           <CardComponent title="Alternative Selling Windows" icon={<Calendar className="w-5 h-5" />}>
             <div className="space-y-3">
               {recommendation.alternative_windows.length === 0 && (
-                <p className="text-sm text-gray-500">No alternative windows available for this commodity.</p>
+                <p className="text-sm" style={{ color: "var(--text-soft)" }}>No alternative windows available for this commodity.</p>
               )}
               {recommendation.alternative_windows.map((window) => (
                 <div
                   key={`${window.month}-${window.days_from_now}`}
-                  className="rounded-lg border border-gray-200 dark:border-gray-700 p-4 text-sm space-y-2"
+                  className="rounded-lg border p-4 text-sm space-y-2"
+                  style={{ borderColor: "var(--border)" }}
                 >
                   <div className="flex items-center justify-between">
-                    <p className="font-semibold">{window.month_name}</p>
+                    <p className="font-semibold" style={{ color: "var(--text-main)" }}>{window.month_name}</p>
                     <span className={`text-xs px-2 py-1 rounded-full ${riskColor(window.risk_level)}`}>
                       {window.risk_level}
                     </span>
                   </div>
-                  <p className="text-gray-500">{window.reason}</p>
+                  <p style={{ color: "var(--text-soft)" }}>{window.reason}</p>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <p className="text-gray-500">Expected price</p>
-                      <p className="font-semibold">{formatINR(window.expected_price)}</p>
+                      <p style={{ color: "var(--text-soft)" }}>Expected price</p>
+                      <p className="font-semibold" style={{ color: "var(--text-main)" }}>{formatINR(window.expected_price)}</p>
                     </div>
                     <div>
-                      <p className="text-gray-500">Net profit</p>
-                      <p className="font-semibold">{formatINR(window.net_profit)}</p>
+                      <p style={{ color: "var(--text-soft)" }}>Net profit</p>
+                      <p className="font-semibold" style={{ color: "var(--text-main)" }}>{formatINR(window.net_profit)}</p>
                     </div>
                   </div>
                 </div>
@@ -337,8 +342,8 @@ export default function SellingStrategyAdvisor() {
           <CardComponent title="Warnings & Tips" icon={<AlertTriangle className="w-5 h-5" />}>
             <div className="space-y-4 text-sm">
               <div>
-                <p className="font-semibold text-gray-700 dark:text-gray-200">Warnings</p>
-                <ul className="list-disc ml-5 text-gray-500 space-y-1">
+                <p className="font-semibold" style={{ color: "var(--text-main)" }}>Warnings</p>
+                <ul className="list-disc ml-5 space-y-1" style={{ color: "var(--text-soft)" }}>
                   {recommendation.warnings.length === 0 && <li>No warnings.</li>}
                   {recommendation.warnings.map((warning) => (
                     <li key={warning}>{warning}</li>
@@ -346,8 +351,8 @@ export default function SellingStrategyAdvisor() {
                 </ul>
               </div>
               <div>
-                <p className="font-semibold text-gray-700 dark:text-gray-200">Tips</p>
-                <ul className="list-disc ml-5 text-gray-500 space-y-1">
+                <p className="font-semibold" style={{ color: "var(--text-main)" }}>Tips</p>
+                <ul className="list-disc ml-5 space-y-1" style={{ color: "var(--text-soft)" }}>
                   {recommendation.tips.length === 0 && <li>No tips.</li>}
                   {recommendation.tips.map((tip) => (
                     <li key={tip}>{tip}</li>

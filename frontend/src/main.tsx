@@ -5,7 +5,7 @@ import App from './App.tsx'
 import { ClerkProvider } from '@clerk/clerk-react'
 import { dark } from '@clerk/themes'
 import { ThemeProvider } from './context/ThemeContext.tsx'
-import NotifyDummy from './data/NotifyDummy.tsx'
+import { NotifyProvider } from './context/NotifyContext.tsx'
 
 // Import and register service worker for PWA functionality
 import { registerSW } from 'virtual:pwa-register'
@@ -18,10 +18,10 @@ const updateSW = registerSW({
     }
   },
   onOfflineReady() {
-    console.log('App ready to work offline')
+    // console.log('App ready to work offline')
   },
   onRegistered(registration) {
-    console.log('Service Worker registered successfully')
+    // console.log('Service Worker registered successfully')
   },
   onRegisterError(error) {
     console.error('Service Worker registration failed:', error)
@@ -39,10 +39,10 @@ const updateSW = registerSW({
       <ThemeProvider>
       <ClerkProvider afterSignOutUrl="/auth" signInForceRedirectUrl="/dashboard/selector" publishableKey={PUBLISHABLE_KEY} appearance={{
         theme: dark,}}>
-        <NotifyDummy>
+        <NotifyProvider>
         <App />
 
-        </NotifyDummy>
+        </NotifyProvider>
       </ClerkProvider>
        </ThemeProvider>
     </StrictMode>,

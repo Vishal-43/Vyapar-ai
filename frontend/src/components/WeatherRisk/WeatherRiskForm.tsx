@@ -31,21 +31,22 @@ export const WeatherRiskForm: React.FC<{
   ];
   
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+    <div className="glass-card rounded-xl shadow-lg p-6 border" style={{ borderColor: "var(--border)" }}>
       <div className="flex items-center gap-2 mb-6">
         <CloudRain className="w-6 h-6 text-blue-500" />
-        <h2 className="text-xl font-semibold">Assessment Form</h2>
+        <h2 className="text-xl font-semibold" style={{ color: "var(--text-main)" }}>Assessment Form</h2>
       </div>
       
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label className="flex items-center gap-2 text-sm font-medium" style={{ color: "var(--text-soft)" }}>
             <Sprout className="w-4 h-4" />
             Commodity
           </label>
           <select 
             {...register('commodity', { required: 'Commodity is required' })}
-            className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+            className="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition"
+            style={{ borderColor: "var(--border)", background: "var(--panel)", color: "var(--text-main)" }}
           >
             <option value="">Select a commodity</option>
             {commodities.map(commodity => (
@@ -58,14 +59,15 @@ export const WeatherRiskForm: React.FC<{
         </div>
 
         <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label className="flex items-center gap-2 text-sm font-medium" style={{ color: "var(--text-soft)" }}>
             <Calendar className="w-4 h-4" />
             Sowing Date
           </label>
           <input 
             type="date" 
             {...register('sowing_date', { required: 'Sowing date is required' })}
-            className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+            className="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition"
+            style={{ borderColor: "var(--border)", background: "var(--panel)", color: "var(--text-main)" }}
           />
           {errors.sowing_date && (
             <p className="text-sm text-red-600 dark:text-red-400">{errors.sowing_date.message}</p>
@@ -73,13 +75,14 @@ export const WeatherRiskForm: React.FC<{
         </div>
 
         <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label className="flex items-center gap-2 text-sm font-medium" style={{ color: "var(--text-soft)" }}>
             <MapPin className="w-4 h-4" />
             Location
           </label>
           <select 
             {...register('location', { required: 'Location is required' })}
-            className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+            className="w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition"
+            style={{ borderColor: "var(--border)", background: "var(--panel)", color: "var(--text-main)" }}
           >
             <option value="">Select a city</option>
             {cities.map(city => (

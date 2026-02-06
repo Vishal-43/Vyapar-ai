@@ -41,7 +41,7 @@ const CropMixOptimizer: React.FC = () => {
       <main className="relative z-10 max-w-6xl mx-auto px-4 pt-24 pb-12 space-y-8">
         <header className="space-y-2">
           <h1 className="text-3xl font-semibold">Crop Mix Optimizer</h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p style={{ color: "var(--text-soft)" }}>
             Optimize your crop allocation to maximize profits based on soil, climate, and market conditions.
           </p>
         </header>

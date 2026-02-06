@@ -67,7 +67,7 @@ export default function DirectBuyerEnginePage() {
       <main className="relative z-10 max-w-6xl mx-auto px-4 pt-24 pb-12 space-y-8">
         <header className="space-y-2">
           <h1 className="text-3xl font-semibold">Direct Buyer Engine</h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p style={{ color: "var(--text-soft)" }}>
             Connect buyers and sellers directly by matching commodity needs with availability.
           </p>
         </header>
